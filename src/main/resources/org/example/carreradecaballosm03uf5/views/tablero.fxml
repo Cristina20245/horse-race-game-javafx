@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane  xmlns:fx="http://javafx.com/fxml" fx:controller="org.example.carreradecaballosm03uf5.controllers.TableroController">
+    <center>
+        <GridPane fx:id="gridPane" />
+    </center>
+</BorderPane>

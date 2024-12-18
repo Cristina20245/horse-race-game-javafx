@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Button?>
+
+<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.carreradecaballosm03uf5.controllers.ResultadoController">
+    <!-- Imagen de fondo -->
+    <ImageView preserveRatio="true" opacity="0.5">
+        <image>
+            <Image url="@../../../../images/background.jpg" />
+        </image>
+    </ImageView>
+
+    <!-- Contenido superpuesto -->
+    <VBox alignment="CENTER" spacing="20.0" stylesheets="@../styles/resultado-view.css">
+        <Label fx:id="ganadorLabel" styleClass="label-ganador" />
+        <ImageView fx:id="caballoImageView" styleClass="image-view-caballo" />
+        <Label fx:id="boteLabel" styleClass="label-bote" />
+        <Button text="Jugar otra vez" onAction="#onVolverButtonClick" styleClass="button" />
+        <Button text="Salir" onAction="#onSalirButtonClick" styleClass="button" />
+    </VBox>
+</StackPane>
