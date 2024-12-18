@@ -1,0 +1,26 @@
+
+.root {
+    -fx-background-color: #ffffff;
+    -fx-padding: 20px;
+}
+
+.button {
+    -fx-font-family: "Arial", sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.6);
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+
+.button:hover {
+    -fx-background-color: gold;
+    -fx-text-fill: black;
+    -fx-border-color: gold;
+}
