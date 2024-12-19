@@ -227,77 +227,78 @@ public class TableroController {
 
         if (nuevoJuego.getGanador() == null) {
 
-        Card cartaSacada = nuevoJuego.jugarRonda();
-        if (cartaSacada != null ) {
+            Card cartaSacada = nuevoJuego.jugarRonda();
+            if (cartaSacada != null ) {
 
-            Text nuevoMensajeTexto = new Text("Ronda " + (nuevoJuego.getRonda() - 1) + ": El crupier ha sacado " + cartaSacada.getDescription());
-            nuevoMensajeTexto.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: black;");
+                Text nuevoMensajeTexto = new Text("Ronda " + (nuevoJuego.getRonda() - 1) + ": El crupier ha sacado " + cartaSacada.getDescription());
+                nuevoMensajeTexto.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: black;");
 
-            if (nombreArchivo == null) {
+                if (nombreArchivo == null) {
 
-                File carpeta = new File(rutaCarpeta); if (!carpeta.exists()) { carpeta.mkdirs(); }
+                    File carpeta = new File(rutaCarpeta); if (!carpeta.exists()) { carpeta.mkdirs(); }
 
-                LocalDateTime ahora = LocalDateTime.now();
-                DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+                    LocalDateTime ahora = LocalDateTime.now();
+                    DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
 
-                nombreArchivo = rutaCarpeta + "/cartas_sacadas_" + ahora.format(formato) + ".json";
+                    nombreArchivo = rutaCarpeta + "/cartas_sacadas_" + ahora.format(formato) + ".json";
+                }
+
+
+                try (FileWriter fw = new FileWriter(nombreArchivo, true);  // true indica que se agrega al final del archivo
+                     PrintWriter pw = new PrintWriter(fw)) {
+                    //pw.println("{Descripcion Carta: " +  cartaSacada.getDescription() + ", Numero de carta: " + cartaSacada.getValue()+ ", Palo de la carta: " + cartaSacada.getSuit() + "}");  // Escribe el mensaje en el archivo
+                    pw.println("{\"Descripcion Carta\": \"" + cartaSacada.getDescription() + "\", \"Numero de carta\": " + cartaSacada.getValue() + ", \"Palo de la carta\": \"" + cartaSacada.getSuit() + "\"},");
+                } catch (IOException e) {
+                    e.printStackTrace();  // Imprime cualquier error que ocurra al escribir el archivo
+                }
+
+                // Obtener la ruta de la imagen de la carta
+                String caminoImagen = cartaSacada.getImagePath();
+                InputStream imagemStream = getClass().getResourceAsStream(caminoImagen);
+
+                if (imagemStream != null) {
+
+                    Image imagemCarta = new Image(imagemStream);
+                    ImageView cartaView = new ImageView(imagemCarta);
+                    cartaView.setFitHeight(120);
+                    cartaView.setPreserveRatio(true);
+
+
+                    HBox mensajeConImagen = new HBox(15);
+                    mensajeConImagen.setAlignment(Pos.CENTER_LEFT);
+                    mensajeConImagen.getChildren().addAll(cartaView, nuevoMensajeTexto);
+
+
+                    String textoCaballo;
+                    if ((nuevoJuego.getRonda() - 1) % 5 == 0) {
+                        textoCaballo = "El caballo de " + cartaSacada.getSuit().getDescription() + " retrocede una posición";
+                    } else {
+                        textoCaballo = "El caballo de " + cartaSacada.getSuit().getDescription() + " avanza una posición";
+                    }
+                    Label labelCaballo = new Label(textoCaballo);
+                    labelCaballo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: black;");
+                    labelCaballo.setAlignment(Pos.CENTER_RIGHT);
+
+
+                    HBox layoutFinal = new HBox(30);
+                    layoutFinal.setAlignment(Pos.CENTER);
+                    layoutFinal.getChildren().addAll(mensajeConImagen, labelCaballo);
+
+
+                    if (parentHBox == null) {
+                        parentHBox = (HBox) mensajeTexto.getParent();
+                    }
+
+                    if (parentHBox != null) {
+                        parentHBox.getChildren().clear();
+                        parentHBox.getChildren().add(layoutFinal);
+                    }
+                }
             }
 
 
-            try (FileWriter fw = new FileWriter(nombreArchivo, true);  // true indica que se agrega al final del archivo
-                 PrintWriter pw = new PrintWriter(fw)) {
-                pw.println("{Descripcion Carta: " +  cartaSacada.getDescription() + ", Numero de carta: " + cartaSacada.getValue()+ ", Palo de la carta: " + cartaSacada.getSuit() + "}");  // Escribe el mensaje en el archivo
-            } catch (IOException e) {
-                e.printStackTrace();  // Imprime cualquier error que ocurra al escribir el archivo
-}
-
-            // Obtener la ruta de la imagen de la carta
-            String caminoImagen = cartaSacada.getImagePath();
-            InputStream imagemStream = getClass().getResourceAsStream(caminoImagen);
-
-            if (imagemStream != null) {
-
-                Image imagemCarta = new Image(imagemStream);
-                ImageView cartaView = new ImageView(imagemCarta);
-                cartaView.setFitHeight(120);
-                cartaView.setPreserveRatio(true);
-
-
-                HBox mensajeConImagen = new HBox(15);
-                mensajeConImagen.setAlignment(Pos.CENTER_LEFT);
-                mensajeConImagen.getChildren().addAll(cartaView, nuevoMensajeTexto);
-
-
-                String textoCaballo;
-                if ((nuevoJuego.getRonda() - 1) % 5 == 0) {
-                    textoCaballo = "El caballo de " + cartaSacada.getSuit().getDescription() + " retrocede una posición";
-                } else {
-                    textoCaballo = "El caballo de " + cartaSacada.getSuit().getDescription() + " avanza una posición";
-                }
-                Label labelCaballo = new Label(textoCaballo);
-                labelCaballo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: black;");
-                labelCaballo.setAlignment(Pos.CENTER_RIGHT);
-
-
-                HBox layoutFinal = new HBox(30);
-                layoutFinal.setAlignment(Pos.CENTER);
-                layoutFinal.getChildren().addAll(mensajeConImagen, labelCaballo);
-
-
-                if (parentHBox == null) {
-                    parentHBox = (HBox) mensajeTexto.getParent();
-                }
-
-                if (parentHBox != null) {
-                    parentHBox.getChildren().clear();
-                    parentHBox.getChildren().add(layoutFinal);
-                }
-            }
-        }
-
-
-        actualizarTablero();
+            actualizarTablero();
         }else{
 //            System.out.println("ya hay un ganador, llamar nueva pantalla aqui");
         }

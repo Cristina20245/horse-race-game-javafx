@@ -1,6 +1,7 @@
 module org.example.carreradecaballosm03uf5 {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
 
     opens org.example.carreradecaballosm03uf5 to javafx.fxml;
