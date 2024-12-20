@@ -34,7 +34,7 @@ public class ApuestasController {
 
 
 
-   ///Metodo para mostrar un resumen de los jugadores y sus apuestas
+    //Metodo para mostrar un resumen de los jugadores y sus apuestas
     public void mostrarApuestasDesdeLogica(Jugador[] jugadores) {
         try {
 
