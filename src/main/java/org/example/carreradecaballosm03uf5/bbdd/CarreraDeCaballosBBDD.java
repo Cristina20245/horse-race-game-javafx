@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
 public class CarreraDeCaballosBBDD {
 
     private static final String URL = "jdbc:mysql://localhost:3306/";
@@ -103,7 +102,27 @@ public class CarreraDeCaballosBBDD {
         ejecutarScript(createTableJugadores);
         ejecutarScript(createTableRondas);
 
+        // Aquí se insertan jugadores y rondas con el idPartida correspondiente
+        insertarJugadores(nuevoIdPartida);
+        insertarRondas(nuevoIdPartida);
+
         System.out.printf("Tablas jugadores%d y rondas%d creadas con éxito.%n", nuevoIdPartida, nuevoIdPartida);
+    }
+
+    // Método para insertar jugadores en la tabla de jugadores
+    public static void insertarJugadores(int idPartida) {
+        String insertarJugador1 = "INSERT INTO jugadores" + idPartida + " (nombre, palo, bote, posicion, idPartida) VALUES ('Jugador 1', 'Espada', 1000, 1, " + idPartida + ");";
+        String insertarJugador2 = "INSERT INTO jugadores" + idPartida + " (nombre, palo, bote, posicion, idPartida) VALUES ('Jugador 2', 'Oros', 1000, 2, " + idPartida + ");";
+        ejecutarScript(insertarJugador1);
+        ejecutarScript(insertarJugador2);
+    }
+
+    // Método para insertar rondas en la tabla de rondas
+    public static void insertarRondas(int idPartida) {
+        String insertarRonda1 = "INSERT INTO rondas" + idPartida + " (numRonda, numCarta, paloCarta, idPartida) VALUES (1, 5, 'Espada', " + idPartida + ");";
+        String insertarRonda2 = "INSERT INTO rondas" + idPartida + " (numRonda, numCarta, paloCarta, idPartida) VALUES (2, 7, 'Oros', " + idPartida + ");";
+        ejecutarScript(insertarRonda1);
+        ejecutarScript(insertarRonda2);
     }
 
     // Método principal para probar la funcionalidad
@@ -112,7 +131,6 @@ public class CarreraDeCaballosBBDD {
         crearTablas(); // Realizar todas las operaciones necesarias
     }
 
-
-public void conectarYEjecutar() {
+    public void conectarYEjecutar() {
     }
 }
