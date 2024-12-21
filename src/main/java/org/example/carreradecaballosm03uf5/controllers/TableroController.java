@@ -50,6 +50,11 @@ public class TableroController {
     public void setJugadores(Jugador[] jugadores) {
         this.jugadores = jugadores;
     }
+
+    /*public void setIdPartida(int idPartida) {
+        this.idPartida = idPartida;
+    }*/
+
     @FXML
     public void initialize() {
         Tablero = new Tablero();

@@ -13,12 +13,13 @@ public class CarreraDeCaballosBBDD {
 
     private static Connection connection;
 
-    // Método para establecer la conexión a la base de datos
+    // Método para obtener o establecer la conexión a la base de datos
     public static Connection getConnection() {
         if (connection == null) {
             try {
-                connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("Conexión establecida con éxito.");
+                crearBaseDeDatos();
+                connection = DriverManager.getConnection(URL + "carreradecaballos", USER, PASSWORD);
+                System.out.println("Conexión establecida con éxito a 'carreradecaballos'.");
             } catch (SQLException e) {
                 System.out.println("Error al conectar a la base de datos: " + e.getMessage());
             }
@@ -26,111 +27,124 @@ public class CarreraDeCaballosBBDD {
         return connection;
     }
 
-    // Método para ejecutar un script SQL
-    public static void ejecutarScript(String script) {
-        if (script != null && !script.trim().isEmpty()) {
-            try (Statement stmt = getConnection().createStatement()) {
-                stmt.executeUpdate(script);
-                System.out.println("Script ejecutado con éxito: " + script);
-            } catch (SQLException e) {
-                System.out.println("Error al ejecutar el script: " + e.getMessage());
-            }
+    // Método para crear la base de datos
+    public static void crearBaseDeDatos() {
+        try (Connection tempConnection = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement stmt = tempConnection.createStatement()) {
+
+            String createDatabase = "CREATE DATABASE IF NOT EXISTS carreradecaballos;";
+            stmt.executeUpdate(createDatabase);
+            System.out.println("Base de datos 'carreradecaballos' creada o ya existe.");
+
+        } catch (SQLException e) {
+            System.out.println("Error al crear la base de datos: " + e.getMessage());
         }
     }
 
-    // Método para crear la base de datos si no existe
-    public static void crearBaseDeDatos() {
-        String createDatabase = "CREATE DATABASE IF NOT EXISTS carreradecaballos;";
-        ejecutarScript(createDatabase);
+    // Método genérico para ejecutar scripts SQL
+    public static void ejecutarScript(String script) {
+        try (Statement stmt = getConnection().createStatement()) {
+            stmt.executeUpdate(script);
+        } catch (SQLException e) {
+            System.out.println("Error al ejecutar script SQL: " + e.getMessage());
+        }
     }
 
-    // Método para realizar todas las operaciones necesarias
+    // Método para crear las tablas y manejar la lógica de idPartida
     public static void crearTablas() {
-        // Asegurarse de que la base de datos exista
+        // Crear base de datos y tablas si no existen
         crearBaseDeDatos();
-
-        // Seleccionar la base de datos
         ejecutarScript("USE carreradecaballos;");
 
-        // Crear la tabla 'partidas' si no existe
+        // Crear la tabla 'partidas'
         String createTablePartidas = """
-            CREATE TABLE IF NOT EXISTS partidas (
-                idPartida INT AUTO_INCREMENT PRIMARY KEY
-            );
-            """;
+        CREATE TABLE IF NOT EXISTS partidas (
+            idPartida INT AUTO_INCREMENT PRIMARY KEY
+        );
+        """;
         ejecutarScript(createTablePartidas);
 
         // Obtener el máximo idPartida existente
         int nuevoIdPartida = 1;
         try (Statement stmt = getConnection().createStatement()) {
             var rs = stmt.executeQuery("SELECT MAX(idPartida) FROM partidas");
-            if (rs.next()) {
+            if (rs.next() && rs.getInt(1) > 0) {
                 nuevoIdPartida = rs.getInt(1) + 1;
             }
         } catch (SQLException e) {
             System.out.println("Error al obtener el máximo idPartida: " + e.getMessage());
         }
 
-        // Insertar una nueva partida
+        // Insertar nueva partida
         String insertarPartida = "INSERT INTO partidas (idPartida) VALUES (" + nuevoIdPartida + ")";
         ejecutarScript(insertarPartida);
 
-        // Crear las tablas jugadoresN y rondasN donde N es el nuevo idPartida
+        // Crear las tablas jugadores<N> y rondas<N>
         String createTableJugadores = """
-            CREATE TABLE IF NOT EXISTS jugadores%s (
-                idJugador INT AUTO_INCREMENT PRIMARY KEY,
-                nombre VARCHAR(255) NOT NULL,
-                palo VARCHAR(50) NOT NULL,
-                bote INT NOT NULL,
-                posicion INT NOT NULL,
-                idPartida INT,
-                FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
-            );
-            """.formatted(nuevoIdPartida);
+        CREATE TABLE IF NOT EXISTS jugadores%s (
+            idJugador INT AUTO_INCREMENT PRIMARY KEY,
+            nombre VARCHAR(255) NOT NULL,
+            palo VARCHAR(50) NOT NULL,
+            bote INT NOT NULL,
+            posicion INT NOT NULL,
+            idPartida INT,
+            FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
+        );
+        """.formatted(nuevoIdPartida);
 
         String createTableRondas = """
-            CREATE TABLE IF NOT EXISTS rondas%s (
-                idPartida INT NOT NULL,
-                numRonda INT NOT NULL,
-                numCarta INT NOT NULL,
-                paloCarta VARCHAR(50) NOT NULL,
-                PRIMARY KEY (idPartida, numRonda),
-                FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
-            );
-            """.formatted(nuevoIdPartida);
+        CREATE TABLE IF NOT EXISTS rondas%s (
+            idPartida INT NOT NULL,
+            numRonda INT NOT NULL,
+            numCarta INT NOT NULL,
+            paloCarta VARCHAR(50) NOT NULL,
+            PRIMARY KEY (idPartida, numRonda),
+            FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
+        );
+        """.formatted(nuevoIdPartida);
 
         ejecutarScript(createTableJugadores);
         ejecutarScript(createTableRondas);
 
-        // Aquí se insertan jugadores y rondas con el idPartida correspondiente
-        insertarJugadores(nuevoIdPartida);
+        // Insertar jugadores
+        //insertarJugadores(nuevoIdPartida, "Jugador 1", "Espada", 100, "Jugador 2", "Oros", 100);
         insertarRondas(nuevoIdPartida);
 
         System.out.printf("Tablas jugadores%d y rondas%d creadas con éxito.%n", nuevoIdPartida, nuevoIdPartida);
     }
 
-    // Método para insertar jugadores en la tabla de jugadores
-    public static void insertarJugadores(int idPartida) {
-        String insertarJugador1 = "INSERT INTO jugadores" + idPartida + " (nombre, palo, bote, posicion, idPartida) VALUES ('Jugador 1', 'Espada', 1000, 1, " + idPartida + ");";
-        String insertarJugador2 = "INSERT INTO jugadores" + idPartida + " (nombre, palo, bote, posicion, idPartida) VALUES ('Jugador 2', 'Oros', 1000, 2, " + idPartida + ");";
+    // Método para insertar jugadores
+    private static void insertarJugadores(int idPartida) {
+        String insertarJugador1 = """
+            INSERT INTO jugadores%s (nombre, palo, bote, posicion, idPartida)
+            VALUES ('Jugador 1', 'Espada', 100, 0, %d);
+            """.formatted(idPartida, idPartida);
+        String insertarJugador2 = """
+            INSERT INTO jugadores%s (nombre, palo, bote, posicion, idPartida)
+            VALUES ('Jugador 2', 'Oros', 100, 0, %d);
+            """.formatted(idPartida, idPartida);
+
         ejecutarScript(insertarJugador1);
         ejecutarScript(insertarJugador2);
     }
 
-    // Método para insertar rondas en la tabla de rondas
-    public static void insertarRondas(int idPartida) {
-        String insertarRonda1 = "INSERT INTO rondas" + idPartida + " (numRonda, numCarta, paloCarta, idPartida) VALUES (1, 5, 'Espada', " + idPartida + ");";
-        String insertarRonda2 = "INSERT INTO rondas" + idPartida + " (numRonda, numCarta, paloCarta, idPartida) VALUES (2, 7, 'Oros', " + idPartida + ");";
+    // Método para insertar rondas
+    private static void insertarRondas(int idPartida) {
+        String insertarRonda1 = """
+            INSERT INTO rondas%s (idPartida, numRonda, numCarta, paloCarta)
+            VALUES (%d, 1, 5, 'Espada');
+            """.formatted(idPartida, idPartida);
+        String insertarRonda2 = """
+            INSERT INTO rondas%s (idPartida, numRonda, numCarta, paloCarta)
+            VALUES (%d, 2, 7, 'Oros');
+            """.formatted(idPartida, idPartida);
+
         ejecutarScript(insertarRonda1);
         ejecutarScript(insertarRonda2);
     }
 
-    // Método principal para probar la funcionalidad
     public static void main(String[] args) {
-        getConnection(); // Establecer la conexión
-        crearTablas(); // Realizar todas las operaciones necesarias
-    }
-
-    public void conectarYEjecutar() {
+        crearTablas();
     }
 }
+

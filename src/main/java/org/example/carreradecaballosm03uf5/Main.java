@@ -24,16 +24,16 @@ public class Main extends Application {
         launch();
     }
 }*/
-
 package org.example.carreradecaballosm03uf5;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD;
+import org.example.carreradecaballosm03uf5.bbdd.ConexionDB;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class Main extends Application {
 
@@ -46,9 +46,12 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
 
-        // Crear una instancia de CarreraDeCaballosBBDD y conectar a la base de datos
-        CarreraDeCaballosBBDD db = new CarreraDeCaballosBBDD();
-        db.conectarYEjecutar();  // Llamamos al método para conectar en un hilo separado
+        // Establecer la conexión con la base de datos
+        try {
+            ConexionDB.getConnection();  // Llamada estática para establecer la conexión
+        } catch (SQLException e) {
+            e.printStackTrace();  // Manejar la excepción de manera adecuada
+        }
     }
 
     public static void main(String[] args) {
