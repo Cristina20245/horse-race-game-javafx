@@ -16,6 +16,8 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD;
+import org.example.carreradecaballosm03uf5.bbdd.ConexionDB;
 import org.example.carreradecaballosm03uf5.model.Juego;
 import org.example.carreradecaballosm03uf5.Utils.MovimientosCaballo;
 import org.example.carreradecaballosm03uf5.model.Card;
@@ -24,6 +26,10 @@ import org.example.carreradecaballosm03uf5.model.Jugador;
 import org.example.carreradecaballosm03uf5.model.Tablero;
 
 import java.io.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -158,18 +164,21 @@ public class TableroController {
     private HBox crearBotonesInferiores() {
         javafx.scene.control.Button salir = new javafx.scene.control.Button("Salir");
         javafx.scene.control.Button jugarRonda = new javafx.scene.control.Button("Jugar Ronda");
+        javafx.scene.control.Button guardar = new javafx.scene.control.Button("Guardar y salir");
 
 
         jugarRonda.getStyleClass().add("button");
         salir.getStyleClass().add("button");
+        guardar.getStyleClass().add("button");
         jugarRonda.setOnAction(e -> jugarRonda());
         salir.setOnAction(e -> System.exit(0));
+        //guardar.setOnAction(e -> guardarRonda());
 
 
         HBox cajaBoton = new HBox(20);
         cajaBoton.setAlignment(Pos.CENTER);
         cajaBoton.setPadding(new Insets(20, 0, 20, 0));
-        cajaBoton.getChildren().addAll(jugarRonda, salir);
+        cajaBoton.getChildren().addAll(jugarRonda, salir, guardar);
 
         return cajaBoton;
     }
@@ -232,10 +241,12 @@ public class TableroController {
 
         if (nuevoJuego.getGanador() == null) {
 
+            int ronda = (nuevoJuego.getRonda() - 1);
+
             Card cartaSacada = nuevoJuego.jugarRonda();
             if (cartaSacada != null ) {
 
-                Text nuevoMensajeTexto = new Text("Ronda " + (nuevoJuego.getRonda() - 1) + ": El crupier ha sacado " + cartaSacada.getDescription());
+                Text nuevoMensajeTexto = new Text("Ronda " + ronda + ": El crupier ha sacado " + cartaSacada.getDescription());
                 nuevoMensajeTexto.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: black;");
 
                 if (nombreArchivo == null) {
@@ -245,10 +256,8 @@ public class TableroController {
                     LocalDateTime ahora = LocalDateTime.now();
                     DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
-
                     nombreArchivo = rutaCarpeta + "/cartas_sacadas_" + ahora.format(formato) + ".json";
                 }
-
 
                 try (FileWriter fw = new FileWriter(nombreArchivo, true);  // true indica que se agrega al final del archivo
                      PrintWriter pw = new PrintWriter(fw)) {
@@ -257,6 +266,14 @@ public class TableroController {
                 } catch (IOException e) {
                     e.printStackTrace();  // Imprime cualquier error que ocurra al escribir el archivo
                 }
+
+                String[] carta = cartaSacada.getDescription().split("de");
+                String palo = carta[1];
+                String valor = carta[0];
+                System.out.println(ronda + palo + valor);
+
+                CarreraDeCaballosBBDD.guardarRonda(ronda, valor, palo);
+
 
                 // Obtener la ruta de la imagen de la carta
                 String caminoImagen = cartaSacada.getImagePath();
@@ -274,7 +291,6 @@ public class TableroController {
                     mensajeConImagen.setAlignment(Pos.CENTER_LEFT);
                     mensajeConImagen.getChildren().addAll(cartaView, nuevoMensajeTexto);
 
-
                     String textoCaballo;
                     if ((nuevoJuego.getRonda() - 1) % 5 == 0) {
                         textoCaballo = "El caballo de " + cartaSacada.getSuit().getDescription() + " retrocede una posición";
@@ -285,11 +301,9 @@ public class TableroController {
                     labelCaballo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: black;");
                     labelCaballo.setAlignment(Pos.CENTER_RIGHT);
 
-
                     HBox layoutFinal = new HBox(30);
                     layoutFinal.setAlignment(Pos.CENTER);
                     layoutFinal.getChildren().addAll(mensajeConImagen, labelCaballo);
-
 
                     if (parentHBox == null) {
                         parentHBox = (HBox) mensajeTexto.getParent();
@@ -301,13 +315,39 @@ public class TableroController {
                     }
                 }
             }
-
-
             actualizarTablero();
         }else{
 //            System.out.println("ya hay un ganador, llamar nueva pantalla aqui");
         }
     }
+
+    /*// Método que guarda las apuestas en la base de datos
+    public static void guardarRonda(Ronda[] rondas, int idPartida) {
+        try (Connection conn = ConexionDB.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+                String insertJugador = """
+            INSERT INTO rondas%s (idPartida, numRonda, numCarta, paloCarta)
+            VALUES ('%s', '%s', %d, %d, %d);
+            """.formatted(
+                        idPartida, // Tabla dinámica
+                        ronda.getRonda(),
+                        ronda.cartaSacada.getValue(),
+                        ronda.cartaSacada.getDescription()
+                        //idPartida // idPartida asociado
+                );
+                stmt.executeUpdate(insertRonda);
+            }
+
+            System.out.println("Rondas guardadas en la base de datos para la partida " + idPartida);
+
+        } catch (SQLException e) {
+            System.out.println("Error al guardar las rondas: " + e.getMessage());
+        }
+    }*/
+
+
+
 
     //Actualizar el grid y la baraja
     private void actualizarTablero() {
@@ -375,7 +415,7 @@ public class TableroController {
             e.printStackTrace();
         }
     }
-
-
-
 }
+
+
+

@@ -117,7 +117,6 @@ public class ApuestasController {
     }
 
 
-
     @FXML
 // Método para continuar a la siguiente pantalla
     public void onContinuarButtonClick(ActionEvent actionEvent) {
@@ -148,29 +147,6 @@ public class ApuestasController {
     }
 
 
-    // Método para guardar los jugadores en la base de datos
-    private void guardarJugadoresEnBD() throws SQLException {
-        Connection connection = CarreraDeCaballosBBDD.getConnection();
-        if (connection != null) {
-            // Preparar la consulta SQL para insertar los jugadores
-            String sql = "INSERT INTO jugadores" + idPartida + " (nombre, palo, bote, posicion, idPartida) VALUES (?, ?, ?, ?, ?)";
-
-            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                // Insertar cada jugador en la base de datos
-                for (Jugador jugador : jugadores) {
-                    pstmt.setString(1, jugador.getNombre());
-                    pstmt.setString(2, jugador.getPalo().getDescription());  // Si `getPalo()` devuelve un objeto, asegúrate de obtener su descripción o valor apropiado.
-                    pstmt.setInt(3, jugador.getFichas());
-                    pstmt.setInt(4, 1);  // Aquí asignamos 1 como valor fijo para la posición
-                    pstmt.setInt(5, idPartida);
-
-                    pstmt.addBatch();  // Usamos batch para mejorar el rendimiento al insertar múltiples jugadores
-                }
-                pstmt.executeBatch();  // Ejecutar todas las inserciones
-                System.out.println("Jugadores guardados en la base de datos.");
-            }
-        }
-    }
 
     @FXML
     // Método para volver a la pantalla de configuración

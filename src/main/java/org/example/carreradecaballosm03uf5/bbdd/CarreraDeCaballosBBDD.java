@@ -1,9 +1,6 @@
 package org.example.carreradecaballosm03uf5.bbdd;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class CarreraDeCaballosBBDD {
 
@@ -12,6 +9,8 @@ public class CarreraDeCaballosBBDD {
     private static final String PASSWORD = "";
 
     private static Connection connection;
+
+    private static int nuevoIdPartida = 1;
 
     // Método para obtener o establecer la conexión a la base de datos
     public static Connection getConnection() {
@@ -51,7 +50,7 @@ public class CarreraDeCaballosBBDD {
     }
 
     public static int crearTablas() {
-        int nuevoIdPartida = 1;
+
 
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
@@ -92,15 +91,24 @@ public class CarreraDeCaballosBBDD {
         """.formatted(nuevoIdPartida);
 
             String createTableRondas = """
-        CREATE TABLE IF NOT EXISTS rondas%s (
-            idPartida INT NOT NULL,
-            numRonda INT NOT NULL,
-            numCarta INT NOT NULL,
-            paloCarta VARCHAR(50) NOT NULL,
-            PRIMARY KEY (idPartida, numRonda),
-            FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
-        );
-        """.formatted(nuevoIdPartida);
+CREATE TABLE IF NOT EXISTS rondas%s (
+    numRonda INT NOT NULL,
+    numCarta VARCHAR(5) NOT NULL,
+    paloCarta VARCHAR(50) NOT NULL,
+    PRIMARY KEY (numRonda)  -- numRonda es auto-incremental y clave primaria
+);
+""".formatted(nuevoIdPartida);
+
+           /* String createTableRondas = """
+CREATE TABLE IF NOT EXISTS rondas%s (
+    idPartida INT NOT NULL,
+    numRonda INT NOT NULL AUTO_INCREMENT,
+    numCarta INT NOT NULL,
+    paloCarta VARCHAR(50) NOT NULL,
+    PRIMARY KEY (numRonda),  -- numRonda es auto-incremental y clave primaria
+    FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
+);
+""".formatted(nuevoIdPartida);*/
 
             ejecutarScript(createTableJugadores);
             ejecutarScript(createTableRondas);
@@ -108,40 +116,29 @@ public class CarreraDeCaballosBBDD {
         } catch (SQLException e) {
             System.out.println("Error al crear tablas: " + e.getMessage());
         }
-
         return nuevoIdPartida;
     }
 
 
-    // Método para insertar jugadores
-    private static void insertarJugadores(int idPartida) {
-        String insertarJugador1 = """
-            INSERT INTO jugadores%s (nombre, palo, bote, posicion, idPartida)
-            VALUES ('Jugador 1', 'Espada', 100, 0, %d);
-            """.formatted(idPartida, idPartida);
-        String insertarJugador2 = """
-            INSERT INTO jugadores%s (nombre, palo, bote, posicion, idPartida)
-            VALUES ('Jugador 2', 'Oros', 100, 0, %d);
-            """.formatted(idPartida, idPartida);
+    public static void guardarRonda(int ronda, String valor, String palo){
 
-        ejecutarScript(insertarJugador1);
-        ejecutarScript(insertarJugador2);
+        String sql = "INSERT INTO rondas" + nuevoIdPartida +" (numRonda, numCarta, paloCarta) VALUES (?, ?, ?)";
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ronda);
+            stmt.setString(2, valor);
+            stmt.setString(3, palo);
+            stmt.executeUpdate();
+
+            System.out.println("Carta guardada correctamente:" + ronda + valor + " de " + palo);
+
+        } catch (SQLException e) {
+            System.out.println("Error al guardar la carta en la base de datos: " + e.getMessage());
+        }
     }
 
-    // Método para insertar rondas
-    private static void insertarRondas(int idPartida) {
-        String insertarRonda1 = """
-            INSERT INTO rondas%s (idPartida, numRonda, numCarta, paloCarta)
-            VALUES (%d, 1, 5, 'Espada');
-            """.formatted(idPartida, idPartida);
-        String insertarRonda2 = """
-            INSERT INTO rondas%s (idPartida, numRonda, numCarta, paloCarta)
-            VALUES (%d, 2, 7, 'Oros');
-            """.formatted(idPartida, idPartida);
 
-        ejecutarScript(insertarRonda1);
-        ejecutarScript(insertarRonda2);
-    }
+
 
     public static void main(String[] args) {
         crearTablas();
