@@ -50,49 +50,48 @@ public class CarreraDeCaballosBBDD {
         }
     }
 
-    // Método para crear las tablas y manejar la lógica de idPartida
-    public static void crearTablas() {
-        // Crear base de datos y tablas si no existen
-        crearBaseDeDatos();
-        ejecutarScript("USE carreradecaballos;");
+    public static int crearTablas() {
+        int nuevoIdPartida = 1;
 
-        // Crear la tabla 'partidas'
-        String createTablePartidas = """
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Crear base de datos y seleccionar esquema
+            crearBaseDeDatos();
+            stmt.execute("USE carreradecaballos;");
+
+            // Crear la tabla 'partidas' si no existe
+            String createTablePartidas = """
         CREATE TABLE IF NOT EXISTS partidas (
             idPartida INT AUTO_INCREMENT PRIMARY KEY
         );
         """;
-        ejecutarScript(createTablePartidas);
+            stmt.execute(createTablePartidas);
 
-        // Obtener el máximo idPartida existente
-        int nuevoIdPartida = 1;
-        try (Statement stmt = getConnection().createStatement()) {
+            // Obtener el nuevo idPartida
             var rs = stmt.executeQuery("SELECT MAX(idPartida) FROM partidas");
-            if (rs.next() && rs.getInt(1) > 0) {
+            if (rs.next()) {
                 nuevoIdPartida = rs.getInt(1) + 1;
             }
-        } catch (SQLException e) {
-            System.out.println("Error al obtener el máximo idPartida: " + e.getMessage());
-        }
 
-        // Insertar nueva partida
-        String insertarPartida = "INSERT INTO partidas (idPartida) VALUES (" + nuevoIdPartida + ")";
-        ejecutarScript(insertarPartida);
+            // Insertar la nueva partida
+            String insertarPartida = "INSERT INTO partidas (idPartida) VALUES (" + nuevoIdPartida + ")";
+            stmt.execute(insertarPartida);
 
-        // Crear las tablas jugadores<N> y rondas<N>
-        String createTableJugadores = """
+            // Crear tablas dinámicas jugadores<N>
+            String createTableJugadores = """
         CREATE TABLE IF NOT EXISTS jugadores%s (
             idJugador INT AUTO_INCREMENT PRIMARY KEY,
             nombre VARCHAR(255) NOT NULL,
             palo VARCHAR(50) NOT NULL,
             bote INT NOT NULL,
-            posicion INT NOT NULL,
+            posicion INT,
             idPartida INT,
             FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
         );
         """.formatted(nuevoIdPartida);
 
-        String createTableRondas = """
+            String createTableRondas = """
         CREATE TABLE IF NOT EXISTS rondas%s (
             idPartida INT NOT NULL,
             numRonda INT NOT NULL,
@@ -103,15 +102,16 @@ public class CarreraDeCaballosBBDD {
         );
         """.formatted(nuevoIdPartida);
 
-        ejecutarScript(createTableJugadores);
-        ejecutarScript(createTableRondas);
+            ejecutarScript(createTableJugadores);
+            ejecutarScript(createTableRondas);
 
-        // Insertar jugadores
-        //insertarJugadores(nuevoIdPartida, "Jugador 1", "Espada", 100, "Jugador 2", "Oros", 100);
-        insertarRondas(nuevoIdPartida);
+        } catch (SQLException e) {
+            System.out.println("Error al crear tablas: " + e.getMessage());
+        }
 
-        System.out.printf("Tablas jugadores%d y rondas%d creadas con éxito.%n", nuevoIdPartida, nuevoIdPartida);
+        return nuevoIdPartida;
     }
+
 
     // Método para insertar jugadores
     private static void insertarJugadores(int idPartida) {
@@ -147,4 +147,3 @@ public class CarreraDeCaballosBBDD {
         crearTablas();
     }
 }
-

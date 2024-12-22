@@ -51,7 +51,7 @@ public class ApuestasController {
 
     // Método que guarda las apuestas en la base de datos
     public static void guardarApuestas(Jugador[] jugadores, int idPartida) {
-        try (Connection conn = CarreraDeCaballosBBDD.getConnection();
+        try (Connection conn = ConexionDB.getConnection();
              Statement stmt = conn.createStatement()) {
 
             for (Jugador jugador : jugadores) {
@@ -119,24 +119,26 @@ public class ApuestasController {
 
 
     @FXML
-    // Metodo para continuar a la siguiente pantalla
+// Método para continuar a la siguiente pantalla
     public void onContinuarButtonClick(ActionEvent actionEvent) {
         try {
+            // Crear las tablas y asignar idPartida
+            idPartida = CarreraDeCaballosBBDD.crearTablas(); // Este método devolverá el nuevo idPartida
+            System.out.println("Tablas creadas con éxito para la partida: " + idPartida);
+
+            // Guardar las apuestas en la base de datos
+            guardarApuestas(jugadores, idPartida);
+
             // Cargar pantalla del tablero
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/carreradecaballosm03uf5/views/tablero.fxml"));
             Scene scene = new Scene(fxmlLoader.load());
 
             TableroController controller = fxmlLoader.getController();
-
             controller.setJugadores(jugadores);
 
-            // Cuando se presiona el botón "Nuevo Juego"
-
-                // Llamamos a crearTablas para crear las tablas y los jugadores
-                CarreraDeCaballosBBDD.crearTablas();
-                // Continuar con la lógica para empezar el juego...
-
+            // Inicializar el tablero con los datos de la partida
             controller.iniciarTablero(new Stage());
+
             // Obtener el Stage actual y cerrarlo después de abrir la nueva pantalla
             Stage currentStage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             currentStage.close();
@@ -144,6 +146,7 @@ public class ApuestasController {
             e.printStackTrace();
         }
     }
+
 
     // Método para guardar los jugadores en la base de datos
     private void guardarJugadoresEnBD() throws SQLException {
