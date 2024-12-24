@@ -321,30 +321,6 @@ public class TableroController {
         }
     }
 
-    /*// Método que guarda las apuestas en la base de datos
-    public static void guardarRonda(Ronda[] rondas, int idPartida) {
-        try (Connection conn = ConexionDB.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-                String insertJugador = """
-            INSERT INTO rondas%s (idPartida, numRonda, numCarta, paloCarta)
-            VALUES ('%s', '%s', %d, %d, %d);
-            """.formatted(
-                        idPartida, // Tabla dinámica
-                        ronda.getRonda(),
-                        ronda.cartaSacada.getValue(),
-                        ronda.cartaSacada.getDescription()
-                        //idPartida // idPartida asociado
-                );
-                stmt.executeUpdate(insertRonda);
-            }
-
-            System.out.println("Rondas guardadas en la base de datos para la partida " + idPartida);
-
-        } catch (SQLException e) {
-            System.out.println("Error al guardar las rondas: " + e.getMessage());
-        }
-    }*/
 
 
 
@@ -416,6 +392,5 @@ public class TableroController {
         }
     }
 }
-
 
 

@@ -60,9 +60,6 @@ public class HelloController {
         // Obtener el controlador de la vista cargada
         PartidaController partidaController = fxmlLoader.getController();
 
-        // Pasar el idPartidaRecuperada al controlador de la nueva vista
-        partidaController.cargarPartida(idPartidaRecuperada);
-
         // Configurar la escena
         Stage stage = (Stage) textoBienvenida.getScene().getWindow();
         Scene scene = new Scene(root);
@@ -78,5 +75,7 @@ public class HelloController {
         // Aquí utilizamos un valor ficticio
         int idPartida = 1; // Deberías hacer una consulta a la base de datos para obtener el idPartida real
         return idPartida;
+
+
     }
 }

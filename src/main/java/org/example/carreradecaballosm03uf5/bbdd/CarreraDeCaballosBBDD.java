@@ -1,10 +1,12 @@
 package org.example.carreradecaballosm03uf5.bbdd;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CarreraDeCaballosBBDD {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/";
+    private static final String URL = "jdbc:mysql://localhost:3306/carreradecaballos";
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
@@ -12,12 +14,14 @@ public class CarreraDeCaballosBBDD {
 
     private static int nuevoIdPartida = 1;
 
-    // Método para obtener o establecer la conexión a la base de datos
     public static Connection getConnection() {
         if (connection == null) {
             try {
-                crearBaseDeDatos();
-                connection = DriverManager.getConnection(URL + "carreradecaballos", USER, PASSWORD);
+                // Conectarse al servidor MySQL sin especificar una base de datos
+                connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                // Ahora seleccionar explícitamente la base de datos 'carreradecaballos'
+                Statement stmt = connection.createStatement();
+                stmt.execute("USE carreradecaballos");
                 System.out.println("Conexión establecida con éxito a 'carreradecaballos'.");
             } catch (SQLException e) {
                 System.out.println("Error al conectar a la base de datos: " + e.getMessage());
@@ -25,6 +29,8 @@ public class CarreraDeCaballosBBDD {
         }
         return connection;
     }
+
+
 
     // Método para crear la base de datos
     public static void crearBaseDeDatos() {
@@ -118,6 +124,24 @@ CREATE TABLE IF NOT EXISTS rondas%s (
         }
         return nuevoIdPartida;
     }
+
+
+    public static List<Integer> cargarPartidasDesdeDB() {
+        List<Integer> partidas = new ArrayList<>();
+        String query = "SELECT idPartida FROM partidas";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                partidas.add(rs.getInt("idPartida"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return partidas;
+    }
+
+
 
 
     public static void guardarRonda(int ronda, String valor, String palo){
