@@ -21,8 +21,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ApuestasController {
 
@@ -50,8 +48,9 @@ public class ApuestasController {
         // Aquí podrías agregar más lógica, como actualizar la UI, etc.
         System.out.println("Apuestas guardadas correctamente.");
     }
-    public static List<Jugador> guardarApuestas(Jugador[] jugadores, int idPartida) {
-        List<Jugador> jugadoresGuardados = new ArrayList<>();
+
+    // Método que guarda las apuestas en la base de datos
+    public static void guardarApuestas(Jugador[] jugadores, int idPartida) {
         try (Connection conn = ConexionDB.getConnection();
              Statement stmt = conn.createStatement()) {
 
@@ -68,7 +67,6 @@ public class ApuestasController {
                         idPartida // idPartida asociado
                 );
                 stmt.executeUpdate(insertJugador);
-                jugadoresGuardados.add(jugador); // Agregar jugador a la lista
             }
 
             System.out.println("Apuestas guardadas en la base de datos para la partida " + idPartida);
@@ -76,9 +74,7 @@ public class ApuestasController {
         } catch (SQLException e) {
             System.out.println("Error al guardar las apuestas: " + e.getMessage());
         }
-        return jugadoresGuardados; // Devolver lista de jugadores
     }
-
 
 
     // Mostrar las apuestas, como ya tienes implementado
@@ -140,14 +136,11 @@ public class ApuestasController {
             controller.setJugadores(jugadores);
 
             // Inicializar el tablero con los datos de la partida
-            // Cambiar la escena sin cerrar la ventana actual
-            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-            stage.setScene(scene);
+            controller.iniciarTablero(new Stage());
 
-            // Maximizar la ventana (opcional)
-            stage.setMaximized(false);  // Primero desactivar la maximización
-            stage.setMaximized(true);   // Luego activar la maximización
-
+            // Obtener el Stage actual y cerrarlo después de abrir la nueva pantalla
+            Stage currentStage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            currentStage.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

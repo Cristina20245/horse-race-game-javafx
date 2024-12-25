@@ -241,7 +241,7 @@ public class TableroController {
 
         if (nuevoJuego.getGanador() == null) {
 
-            int ronda = (nuevoJuego.getRonda() - 1);
+            int ronda = (nuevoJuego.getRonda() );
 
             Card cartaSacada = nuevoJuego.jugarRonda();
             if (cartaSacada != null ) {
@@ -320,9 +320,6 @@ public class TableroController {
 //            System.out.println("ya hay un ganador, llamar nueva pantalla aqui");
         }
     }
-
-
-
 
 
     //Actualizar el grid y la baraja

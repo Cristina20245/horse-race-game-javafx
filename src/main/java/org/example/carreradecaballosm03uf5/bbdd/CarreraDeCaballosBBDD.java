@@ -1,12 +1,10 @@
 package org.example.carreradecaballosm03uf5.bbdd;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CarreraDeCaballosBBDD {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/carreradecaballos";
+    private static final String URL = "jdbc:mysql://localhost:3306/";
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
@@ -14,14 +12,12 @@ public class CarreraDeCaballosBBDD {
 
     private static int nuevoIdPartida = 1;
 
+    // Método para obtener o establecer la conexión a la base de datos
     public static Connection getConnection() {
         if (connection == null) {
             try {
-                // Conectarse al servidor MySQL sin especificar una base de datos
-                connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                // Ahora seleccionar explícitamente la base de datos 'carreradecaballos'
-                Statement stmt = connection.createStatement();
-                stmt.execute("USE carreradecaballos");
+                crearBaseDeDatos();
+                connection = DriverManager.getConnection(URL + "carreradecaballos", USER, PASSWORD);
                 System.out.println("Conexión establecida con éxito a 'carreradecaballos'.");
             } catch (SQLException e) {
                 System.out.println("Error al conectar a la base de datos: " + e.getMessage());
@@ -29,8 +25,6 @@ public class CarreraDeCaballosBBDD {
         }
         return connection;
     }
-
-
 
     // Método para crear la base de datos
     public static void crearBaseDeDatos() {
@@ -68,8 +62,9 @@ public class CarreraDeCaballosBBDD {
             // Crear la tabla 'partidas' si no existe
             String createTablePartidas = """
         CREATE TABLE IF NOT EXISTS partidas (
-            idPartida INT AUTO_INCREMENT PRIMARY KEY
-        );
+            idPartida INT AUTO_INCREMENT PRIMARY KEY,
+            estado VARCHAR(10) NOT NULL DEFAULT 'pendiente' -- Estado inicial por defecto
+            );
         """;
             stmt.execute(createTablePartidas);
 
@@ -83,14 +78,14 @@ public class CarreraDeCaballosBBDD {
             String insertarPartida = "INSERT INTO partidas (idPartida) VALUES (" + nuevoIdPartida + ")";
             stmt.execute(insertarPartida);
 
-            // Crear tablas dinámicas jugadores<N>
+            // Crear tabla dinámica `jugadores<N>`
             String createTableJugadores = """
-        CREATE TABLE IF NOT EXISTS jugadores%s (
-            idJugador INT AUTO_INCREMENT PRIMARY KEY,
-            nombre VARCHAR(255) NOT NULL,
-            palo VARCHAR(50) NOT NULL,
-            bote INT NOT NULL,
-            posicion INT,
+            CREATE TABLE IF NOT EXISTS jugadores%s (
+                idJugador INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(255) NOT NULL,
+                palo VARCHAR(50) NOT NULL,
+                bote INT NOT NULL,
+                posicion INT,
             idPartida INT,
             FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
         );
@@ -105,17 +100,6 @@ CREATE TABLE IF NOT EXISTS rondas%s (
 );
 """.formatted(nuevoIdPartida);
 
-           /* String createTableRondas = """
-CREATE TABLE IF NOT EXISTS rondas%s (
-    idPartida INT NOT NULL,
-    numRonda INT NOT NULL AUTO_INCREMENT,
-    numCarta INT NOT NULL,
-    paloCarta VARCHAR(50) NOT NULL,
-    PRIMARY KEY (numRonda),  -- numRonda es auto-incremental y clave primaria
-    FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
-);
-""".formatted(nuevoIdPartida);*/
-
             ejecutarScript(createTableJugadores);
             ejecutarScript(createTableRondas);
 
@@ -124,24 +108,6 @@ CREATE TABLE IF NOT EXISTS rondas%s (
         }
         return nuevoIdPartida;
     }
-
-
-    public static List<Integer> cargarPartidasDesdeDB() {
-        List<Integer> partidas = new ArrayList<>();
-        String query = "SELECT idPartida FROM partidas";
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-            while (rs.next()) {
-                partidas.add(rs.getInt("idPartida"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return partidas;
-    }
-
-
 
 
     public static void guardarRonda(int ronda, String valor, String palo){

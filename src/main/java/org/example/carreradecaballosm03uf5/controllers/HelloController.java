@@ -14,6 +14,7 @@ public class HelloController {
     @FXML
     private Label textoBienvenida;
 
+
     @FXML
     // Método para manejar el clic en "Jugar" y cambiar a la pantalla de configuración
     protected void onJugarButtonClick() throws IOException {
@@ -37,45 +38,30 @@ public class HelloController {
     }
 
     @FXML
-    // Método para manejar el clic en "Salir"
-    protected void onSalirButtonClick() {
-        Platform.exit();
-        System.exit(0);
-    }
-
-    @FXML
-// Método para manejar el clic en "Recuperar Partida"
+    // Método para manejar el clic en "Recuperar partida" y cambiar a la pantalla de recuperación
     protected void onRecuperarButtonClick() throws IOException {
-        // Recuperar el último idPartida desde la base de datos
-        int idPartidaRecuperada = recuperarUltimaPartida();
-
-        // Cargar la pantalla de la partida recuperada
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(
-                "/org/example/carreradecaballosm03uf5/views/partida.fxml"
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/carreradecaballosm03uf5/views/partida.fxml"  // Aquí la ruta al archivo de recuperación
         ));
 
-        // Cargar la vista
         Parent root = fxmlLoader.load();
-
-        // Obtener el controlador de la vista cargada
-        PartidaController partidaController = fxmlLoader.getController();
-
-        // Configurar la escena
         Stage stage = (Stage) textoBienvenida.getScene().getWindow();
         Scene scene = new Scene(root);
+
+        root.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                root.requestLayout();
+            }
+        });
+
         stage.setScene(scene);
         stage.setMaximized(false);
         stage.setMaximized(true);
     }
 
-
-    // Método para recuperar la última partida desde la base de datos
-    private int recuperarUltimaPartida() {
-        // Lógica para obtener el idPartida desde la base de datos
-        // Aquí utilizamos un valor ficticio
-        int idPartida = 1; // Deberías hacer una consulta a la base de datos para obtener el idPartida real
-        return idPartida;
-
-
+    @FXML
+    // Método para manejar el clic en "Salir"
+    protected void onSalirButtonClick() {
+        Platform.exit();
+        System.exit(0);
     }
 }
