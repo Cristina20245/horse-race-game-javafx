@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
 import javafx.application.Platform;
+import org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD;
 
 import java.io.IOException;
 
@@ -37,25 +38,23 @@ public class HelloController {
         stage.setMaximized(true);
     }
 
-    @FXML
-    // Método para manejar el clic en "Recuperar partida" y cambiar a la pantalla de recuperación
-    protected void onRecuperarButtonClick() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/carreradecaballosm03uf5/views/partida.fxml"  // Aquí la ruta al archivo de recuperación
-        ));
-
-        Parent root = fxmlLoader.load();
-        Stage stage = (Stage) textoBienvenida.getScene().getWindow();
-        Scene scene = new Scene(root);
-
-        root.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                root.requestLayout();
+    public void onRecuperarButtonClick() {
+        // Llamar a obtener partidas
+        if (!CarreraDeCaballosBBDD.obtenerPartidasGuardadas().isEmpty()) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/carreradecaballosm03uf5/views/partida.fxml"));
+                Parent root = loader.load();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.setMaximized(false);
+                stage.setMaximized(true);
+                stage.show();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
-
-        stage.setScene(scene);
-        stage.setMaximized(false);
-        stage.setMaximized(true);
+        } else {
+            System.out.println("No hay partidas guardadas.");
+        }
     }
 
     @FXML

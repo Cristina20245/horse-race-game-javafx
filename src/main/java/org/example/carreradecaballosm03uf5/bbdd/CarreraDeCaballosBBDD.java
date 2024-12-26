@@ -1,6 +1,8 @@
 package org.example.carreradecaballosm03uf5.bbdd;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CarreraDeCaballosBBDD {
 
@@ -49,56 +51,49 @@ public class CarreraDeCaballosBBDD {
         }
     }
 
+    // Crear tablas y retornar el nuevo ID de partida
     public static int crearTablas() {
-
-
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // Crear base de datos y seleccionar esquema
-            crearBaseDeDatos();
-            stmt.execute("USE carreradecaballos;");
-
             // Crear la tabla 'partidas' si no existe
             String createTablePartidas = """
-        CREATE TABLE IF NOT EXISTS partidas (
-            idPartida INT AUTO_INCREMENT PRIMARY KEY,
-            estado VARCHAR(10) NOT NULL DEFAULT 'pendiente' -- Estado inicial por defecto
-            );
-        """;
+                CREATE TABLE IF NOT EXISTS partidas (
+                    idPartida INT AUTO_INCREMENT PRIMARY KEY,
+                    estado VARCHAR(10) NOT NULL DEFAULT 'pendiente' -- Estado inicial por defecto
+                );
+            """;
             stmt.execute(createTablePartidas);
 
             // Obtener el nuevo idPartida
-            var rs = stmt.executeQuery("SELECT MAX(idPartida) FROM partidas");
+            ResultSet rs = stmt.executeQuery("SELECT MAX(idPartida) AS maxId FROM partidas");
             if (rs.next()) {
-                nuevoIdPartida = rs.getInt(1) + 1;
+                nuevoIdPartida = rs.getInt("maxId") + 1;
             }
 
             // Insertar la nueva partida
-            String insertarPartida = "INSERT INTO partidas (idPartida) VALUES (" + nuevoIdPartida + ")";
+            String insertarPartida = "INSERT INTO partidas (estado) VALUES ('pendiente')";
             stmt.execute(insertarPartida);
 
             // Crear tabla dinámica `jugadores<N>`
             String createTableJugadores = """
-            CREATE TABLE IF NOT EXISTS jugadores%s (
-                idJugador INT AUTO_INCREMENT PRIMARY KEY,
-                nombre VARCHAR(255) NOT NULL,
-                palo VARCHAR(50) NOT NULL,
-                bote INT NOT NULL,
-                posicion INT,
-            idPartida INT,
-            FOREIGN KEY (idPartida) REFERENCES partidas(idPartida)
-        );
-        """.formatted(nuevoIdPartida);
+                CREATE TABLE IF NOT EXISTS jugadores%s (
+                    idJugador INT AUTO_INCREMENT PRIMARY KEY,
+                    nombre VARCHAR(255) NOT NULL,
+                    palo VARCHAR(50) NOT NULL,
+                    bote INT NOT NULL,
+                    posicion INT
+                );
+            """.formatted(nuevoIdPartida);
 
             String createTableRondas = """
-CREATE TABLE IF NOT EXISTS rondas%s (
-    numRonda INT NOT NULL,
-    numCarta VARCHAR(5) NOT NULL,
-    paloCarta VARCHAR(50) NOT NULL,
-    PRIMARY KEY (numRonda)  -- numRonda es auto-incremental y clave primaria
-);
-""".formatted(nuevoIdPartida);
+                CREATE TABLE IF NOT EXISTS rondas%s (
+                    numRonda INT NOT NULL,
+                    numCarta VARCHAR(5) NOT NULL,
+                    paloCarta VARCHAR(50) NOT NULL,
+                    PRIMARY KEY (numRonda)
+                );
+            """.formatted(nuevoIdPartida);
 
             ejecutarScript(createTableJugadores);
             ejecutarScript(createTableRondas);
@@ -109,28 +104,47 @@ CREATE TABLE IF NOT EXISTS rondas%s (
         return nuevoIdPartida;
     }
 
-
-    public static void guardarRonda(int ronda, String valor, String palo){
-
-        String sql = "INSERT INTO rondas" + nuevoIdPartida +" (numRonda, numCarta, paloCarta) VALUES (?, ?, ?)";
-        try (Connection conn = ConexionDB.getConnection();
+    // Guardar una ronda en la tabla dinámica correspondiente
+    public static void guardarRonda(int ronda, String valor, String palo) {
+        String sql = "INSERT INTO rondas" + nuevoIdPartida + " (numRonda, numCarta, paloCarta) VALUES (?, ?, ?)";
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, ronda);
             stmt.setString(2, valor);
             stmt.setString(3, palo);
             stmt.executeUpdate();
 
-            System.out.println("Carta guardada correctamente:" + ronda + valor + " de " + palo);
+            System.out.println("Carta guardada correctamente: " + ronda + valor + " de " + palo);
 
         } catch (SQLException e) {
             System.out.println("Error al guardar la carta en la base de datos: " + e.getMessage());
         }
     }
 
+    // Método para obtener partidas guardadas
+    public static List<Integer> obtenerPartidasGuardadas() {
+        List<Integer> partidas = new ArrayList<>();
+        String query = "SELECT idPartida FROM partidas";
 
+        try (Connection conn = ConexionDB.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
 
+            while (rs.next()) {
+                partidas.add(rs.getInt("idPartida"));
+            }
 
+        } catch (SQLException e) {
+            System.out.println("Error al obtener partidas guardadas: " + e.getMessage());
+        }
+
+        return partidas;
+    }
     public static void main(String[] args) {
-        crearTablas();
+        int idPartida = crearTablas();
+        System.out.println("Nueva partida creada con ID: " + idPartida);
+
+        List<Integer> partidas = obtenerPartidasGuardadas();
+        System.out.println("Partidas guardadas: " + partidas);
     }
 }
