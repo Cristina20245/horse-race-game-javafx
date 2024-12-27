@@ -32,6 +32,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD.nuevoIdPartida;
 
 public class TableroController {
 
@@ -161,7 +165,7 @@ public class TableroController {
 
         return gridPane;
     }
-    private HBox crearBotonesInferiores() {
+    /*private HBox crearBotonesInferiores() {
         javafx.scene.control.Button salir = new javafx.scene.control.Button("Salir");
         javafx.scene.control.Button jugarRonda = new javafx.scene.control.Button("Jugar Ronda");
         javafx.scene.control.Button guardar = new javafx.scene.control.Button("Guardar y salir");
@@ -181,7 +185,106 @@ public class TableroController {
         cajaBoton.getChildren().addAll(jugarRonda, salir, guardar);
 
         return cajaBoton;
+    }*/
+
+    /*private HBox crearBotonesInferiores() {
+        javafx.scene.control.Button salir = new javafx.scene.control.Button("Salir");
+        javafx.scene.control.Button jugarRonda = new javafx.scene.control.Button("Jugar Ronda");
+        javafx.scene.control.Button guardar = new javafx.scene.control.Button("Guardar y salir");
+
+        jugarRonda.getStyleClass().add("button");
+        salir.getStyleClass().add("button");
+        guardar.getStyleClass().add("button");
+
+        // Acción de jugar ronda
+        jugarRonda.setOnAction(e -> jugarRonda());
+
+        // Acción de salir
+        salir.setOnAction(e -> System.exit(0));
+
+        // Acción de guardar posición y salir
+        guardar.setOnAction(e -> {
+            // Obtener las posiciones de los jugadores en el tablero antes de salir
+            // Estos valores deben ser calculados de acuerdo a la lógica del tablero
+            int[] idsJugadores = {1, 2, 3, 4};
+            int[][] posiciones = {
+                    {0, 1}, // Jugador 1
+                    {0, 2}, // Jugador 2
+                    {0, 3}, // Jugador 3
+                    {0, 4}  // Jugador 4
+            };
+            CardSuit[] palos = {CardSuit.SWORDS, CardSuit.CLUBS, CardSuit.CUPS, CardSuit.GOLD};
+
+// Guardar posiciones y palos
+            guardarPosicionAntesDeSalir(idsJugadores, posiciones, palos);
+
+
+            // Cerrar la aplicación después de guardar
+            System.exit(0);
+        });
+
+        // Crear el contenedor de botones
+        HBox cajaBoton = new HBox(20);
+        cajaBoton.setAlignment(Pos.CENTER);
+        cajaBoton.setPadding(new Insets(20, 0, 20, 0));
+        cajaBoton.getChildren().addAll(jugarRonda, salir, guardar);
+
+        return cajaBoton;
+    }*/
+
+    private HBox crearBotonesInferiores() {
+        javafx.scene.control.Button salir = new javafx.scene.control.Button("Salir");
+        javafx.scene.control.Button jugarRonda = new javafx.scene.control.Button("Jugar Ronda");
+        javafx.scene.control.Button guardar = new javafx.scene.control.Button("Guardar y salir");
+
+        jugarRonda.getStyleClass().add("button");
+        salir.getStyleClass().add("button");
+        guardar.getStyleClass().add("button");
+
+        // Acción de jugar ronda
+        jugarRonda.setOnAction(e -> jugarRonda());
+
+        // Acción de salir
+        salir.setOnAction(e -> System.exit(0));
+
+        // Acción de guardar posición y salir
+        guardar.setOnAction(e -> {
+            // Crear instancia de la clase BBDD
+            CarreraDeCaballosBBDD bbdd = new CarreraDeCaballosBBDD();
+
+            // Obtener las posiciones de los jugadores en el tablero
+            // Supongamos que estas posiciones se obtienen de un método o están definidas
+            Map<String, Integer> posicionesCaballos = new HashMap<>();
+            posicionesCaballos.put("Oros", 1);    // Primera línea
+            posicionesCaballos.put("Espadas", 2); // Segunda línea
+            posicionesCaballos.put("Copas", 3);   // Tercera línea
+            posicionesCaballos.put("Bastos", 4);  // Cuarta línea
+
+            // Guardar las posiciones en la base de datos para una partida específica
+            int idPartida = obtenerIdPartidaActual(); // Método que retorna el ID de la partida actual
+            bbdd.guardarPosicionesAntesDeSalir(idPartida, posicionesCaballos);
+
+            // Cerrar la aplicación después de guardar
+            System.exit(0);
+        });
+
+        // Crear el contenedor de botones
+        HBox cajaBoton = new HBox(20);
+        cajaBoton.setAlignment(Pos.CENTER);
+        cajaBoton.setPadding(new Insets(20, 0, 20, 0));
+        cajaBoton.getChildren().addAll(jugarRonda, salir, guardar);
+
+        return cajaBoton;
     }
+
+    // Método ficticio para obtener el ID de la partida actual
+    private int obtenerIdPartidaActual() {
+        // Reemplaza con la lógica para obtener el ID de la partida que está en curso
+        return 34; // Ejemplo: Partida con ID 34
+    }
+
+
+
 
     private Canvas crearBordaAlternada(double ancho, double alto) {
         Canvas canvas = new Canvas(ancho, alto);
@@ -322,50 +425,113 @@ public class TableroController {
     }
 
 
-    //Actualizar el grid y la baraja
+    // Método para actualizar el tablero y la posición de los caballos
     private void actualizarTablero() {
+        // Eliminar elementos del gridPane que son de tipo StackPane con un hijo ImageView (para actualizar la visualización)
         gridPane.getChildren().removeIf(node -> node instanceof StackPane && ((StackPane) node).getChildren().get(0) instanceof ImageView);
 
-        // Poner los caballos
+        // Obtener todos los palos disponibles en el juego
         CardSuit[] palos = CardSuit.values();
 
+        // Iterar sobre cada palo (caballo) para actualizar su posición
         for (int i = 0; i < palos.length; i++) {
-            CardSuit suit = palos[i];
-            int posicion = Tablero.obtenerPosicion(suit);
+            CardSuit suit = palos[i]; // Palo actual
+            int posicion = Tablero.obtenerPosicion(suit); // Obtener la posición del caballo en el tablero
 
+            // Construir la ruta de la imagen correspondiente al caballo
             String caminoImagen = "/images/KNIGHT_" + suit + ".png";
+
+            // Posicionar el caballo en la celda correspondiente
             posicionarCaballo(gridPane, caminoImagen, i, posicion);
 
-            // Verificar si un caballo ha llegado a la meta
+            // Verificar si un caballo ha alcanzado la meta
             if (posicion >= Tablero.getLongitudDeLasPistas()) {
-
+                // Definir al ganador del juego y actualizar la información del bote final
                 nuevoJuego.definirGanador(jugadores, suit);
 
-                // Llamar a la pantalla de resultados
+                // Cambiar a la pantalla de resultados, mostrando el ganador y el bote final
                 cambiarALaPantallaGanador(nuevoJuego.getGanador(), nuevoJuego.getBoteFinal());
-                break;  // Salir del ciclo si ya se determinó un ganador
+
+                // Salir del ciclo, ya que se ha encontrado un ganador
+                break;
             }
         }
     }
 
-    //Posicionar los caballos en el tablero
+    // Método para posicionar un caballo en el tablero
     private void posicionarCaballo(GridPane gridPane, String caminoImagen, int linha, int coluna) {
         try {
+            // Cargar la imagen del caballo desde el recurso especificado
             Image caballoImage = new Image(getClass().getResourceAsStream(caminoImagen));
             ImageView caballoView = new ImageView(caballoImage);
-            caballoView.setFitWidth(TAMANO_CELULA - 10);
-            caballoView.setFitHeight(TAMANO_CELULA - 10);
-            caballoView.setPreserveRatio(true);
 
+            // Ajustar el tamaño del ImageView para adaptarse a la celda
+            caballoView.setFitWidth(TAMANO_CELULA - 10); // Ancho ajustado
+            caballoView.setFitHeight(TAMANO_CELULA - 10); // Alto ajustado
+            caballoView.setPreserveRatio(true); // Mantener la proporción de la imagen
+
+            // Crear un StackPane para contener la imagen y permitir apilar elementos si es necesario
             StackPane celulaPane = new StackPane();
             celulaPane.getChildren().add(caballoView);
 
+            // Añadir el StackPane al gridPane en la posición especificada
             gridPane.add(celulaPane, coluna, linha);
         } catch (Exception e) {
-//            System.out.println("Error al cargar la imagem: " + caminoImagen);
-            e.printStackTrace();
+            // Manejar excepciones relacionadas con la carga de imágenes
+          //  System.err.println("Error al cargar la imagen: " + caminoImagen);
+            e.printStackTrace(); // Mostrar la traza del error para depuración
         }
     }
+
+/*
+    private void guardarPosicionAntesDeSalir(int[] idsJugadores, int[][] posiciones, CardSuit[] palos) {
+        // Preparamos la consulta SQL para actualizar las posiciones y los palos de los jugadores
+        // Usamos `nuevoIdPartida` para generar el nombre de la tabla correspondiente
+        String sql = "UPDATE jugadores" + nuevoIdPartida + " SET posicion = ?, palo = ? WHERE idJugador = ?";
+
+        try (
+                // Obtenemos la conexión a la base de datos utilizando el método getConnection() de CarreraDeCaballosBBDD
+                Connection conn = CarreraDeCaballosBBDD.getConnection()
+        ) {
+            // Verificamos si la conexión es nula o está cerrada, en cuyo caso lanzamos una excepción
+            if (conn == null || conn.isClosed()) {
+                throw new SQLException("La conexión a la base de datos no está disponible.");
+            }
+
+            // Creamos un PreparedStatement para ejecutar la consulta SQL de actualización
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Iteramos sobre los jugadores para actualizar su posición y palo
+                for (int i = 0; i < idsJugadores.length; i++) {
+                    // Obtenemos los valores necesarios para la consulta
+                    int idJugador = idsJugadores[i]; // ID del jugador
+                    int fila = posiciones[i][0];     // Fila de la posición
+                    int columna = posiciones[i][1];  // Columna de la posición
+                    String posicion = fila + "," + columna; // Convertimos la posición a una cadena "fila,columna"
+                    String palo = palos[i].name();          // Obtenemos el nombre del palo (por ejemplo, "SWORDS")
+
+                    // Asignamos los parámetros a la consulta SQL
+                    stmt.setString(1, posicion); // Asignamos la posición
+                    stmt.setString(2, palo);     // Asignamos el palo
+                    stmt.setInt(3, idJugador);   // Asignamos el ID del jugador
+
+                    // Ejecutamos la actualización en la base de datos
+                    stmt.executeUpdate();
+
+                    // Imprimimos un mensaje de éxito para cada jugador
+                    System.out.println("Posición y palo guardados correctamente para el jugador ID: " + idJugador);
+                }
+            }
+        } catch (SQLException e) {
+            // Si ocurre una excepción durante el proceso, la capturamos y mostramos un mensaje de error
+            System.out.println("Error al guardar las posiciones y palos de los caballos: " + e.getMessage());
+        }
+    }*/
+
+
+
+
+
+
 
     //Cambiar a la pantalla del ganador
     private void cambiarALaPantallaGanador(Jugador ganador, Integer bote) {
