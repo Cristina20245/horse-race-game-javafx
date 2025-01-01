@@ -44,11 +44,18 @@ public class HelloController {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/carreradecaballosm03uf5/views/partida.fxml"));
                 Parent root = loader.load();
-                Stage stage = new Stage();
-                stage.setScene(new Scene(root));
+                Stage stage = (Stage) textoBienvenida.getScene().getWindow();  // Obtener el Stage actual
+                Scene scene = new Scene(root);
+
+                root.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                    if (newScene != null) {
+                        root.requestLayout();
+                    }
+                });
+
+                stage.setScene(scene);  // Cambiar la escena de la ventana actual
                 stage.setMaximized(false);
                 stage.setMaximized(true);
-                stage.show();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -56,6 +63,7 @@ public class HelloController {
             System.out.println("No hay partidas guardadas.");
         }
     }
+
 
     @FXML
     // Método para manejar el clic en "Salir"
