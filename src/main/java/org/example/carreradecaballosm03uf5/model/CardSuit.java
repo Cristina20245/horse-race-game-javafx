@@ -32,4 +32,18 @@ public enum CardSuit {
         return simboloCaballo; // Devuelve la descripción del palo
     }
 
+
+    /**
+     * Busca el valor del enum basado en la descripción.
+     * @param description La descripción del palo.
+     * @return El valor del enum correspondiente, o null si no se encuentra.
+     */
+    public static CardSuit fromDescription(String description) {
+        for (CardSuit suit : CardSuit.values()) {
+            if (suit.getDescription().equalsIgnoreCase(description)) {
+                return suit;
+            }
+        }
+        return null; // Devuelve null si no se encuentra coincidencia
+    }
 }

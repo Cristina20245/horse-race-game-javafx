@@ -8,14 +8,13 @@ import org.example.carreradecaballosm03uf5.model.JugadorHumano;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 public class CreadorDeJugadores {
 
     /**
      * Crea jugadores (un jugador humano y tres bots).
      */
-    public static Jugador[] crearJugadores(String playerName, CardSuit palo,Integer bet) {
+    public static Jugador[] crearJugadores(String playerName, CardSuit palo, Integer bet) {
         // Crea el jugador humano
         Jugador jugadorHumano = crearJugadorHumano(playerName,palo ,bet);
 
@@ -38,14 +37,6 @@ public class CreadorDeJugadores {
         for (int i = 1; i <= 3; i++) {
             jugadores[i] = crearJugadorBot(nombresBots[i - 1], palosNaipes.get(i - 1)); // Asigna palo y ficha aleatoria al bot
         }
-
-//        System.out.println("------------------------------------------");
-//        System.out.println("RESUMEN DE LA PARTIDA:");
-        // Muestra los detalles finales de todos los jugadores en la primera tabla antes de jugar
-//        for (Jugador jugador : jugadores) {
-//            System.out.println(jugador.getDescription());
-//        }
-//        System.out.println("------------------------------------------");
         return jugadores;
     }
 

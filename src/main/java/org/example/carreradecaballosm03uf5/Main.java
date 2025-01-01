@@ -6,10 +6,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import org.example.carreradecaballosm03uf5.bbdd.ConexionDB;
+import org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 public class Main extends Application {
 
@@ -22,12 +21,8 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
 
-        // Establecer la conexión con la base de datos
-        try {
-            ConexionDB.getConnection();  // Llamada estática para establecer la conexión
-        } catch (SQLException e) {
-            e.printStackTrace();  // Manejar la excepción de manera adecuada
-        }
+        // crea las tablas
+        CarreraDeCaballosBBDD.createTables();
     }
 
     public static void main(String[] args) {

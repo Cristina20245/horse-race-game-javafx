@@ -1,0 +1,4 @@
+--patch-module
+org.example.carreradecaballosm03uf5=_
+--add-reads
+org.example.carreradecaballosm03uf5=ALL-UNNAMED

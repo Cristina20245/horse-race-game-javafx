@@ -2,22 +2,25 @@ package org.example.carreradecaballosm03uf5.model;
 
 import java.util.HashMap;
 import java.util.Map;
-//comentario
+
 public class Tablero {
 
     private Map<String, Integer> posicicionDeLosCaballos; // Almacena las posiciones de los caballos
-    private final int longitudDeLasPistas = 10;
 
     // Constructor
-    public Tablero() {
+    public Tablero(Map<String, Integer> posicicionDeLosCaballosNewPartida) {
         this.posicicionDeLosCaballos = new HashMap<>();
 
-        // Obtiene los valores de la enumeración CardSuit
-        CardSuit[] suits = CardSuit.values();
+        if(posicicionDeLosCaballosNewPartida.isEmpty()) {
+            // Obtiene los valores de la enumeración CardSuit
+            CardSuit[] suits = CardSuit.values();
 
-        // Inicializa las posiciones con los símbolos de los caballos para cada CardSuit
-        for (CardSuit suit : suits) {
-            posicicionDeLosCaballos.put(suit.getDescription(), 0);
+            // Inicializa las posiciones con los símbolos de los caballos para cada CardSuit
+            for (CardSuit suit : suits) {
+                posicicionDeLosCaballos.put(suit.getDescription(), 0);
+            }
+        } else {
+            posicicionDeLosCaballos = posicicionDeLosCaballosNewPartida;
         }
     }
 
@@ -28,12 +31,7 @@ public class Tablero {
     }
 
     // Método para obtener la posición de un caballo
-    public int obtenerPosicion(CardSuit caballo) {
+    public int obtenerPosicion(CardSuit caballo, int idPartida) {
         return posicicionDeLosCaballos.getOrDefault(caballo.getDescription(), -1); // Retorna -1 si el caballo no se encuentra
-    }
-
-    // Método para obtener la longitud de las pistas
-    public int getLongitudDeLasPistas() {
-        return longitudDeLasPistas;
     }
 }

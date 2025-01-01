@@ -1,4 +1,5 @@
 package org.example.carreradecaballosm03uf5.controllers;
+
 import javafx.fxml.FXML;
 
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.example.carreradecaballosm03uf5.Utils.Constants;
 import org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD;
 import org.example.carreradecaballosm03uf5.bbdd.ConexionDB;
 import org.example.carreradecaballosm03uf5.model.Juego;
@@ -26,31 +28,19 @@ import org.example.carreradecaballosm03uf5.model.Jugador;
 import org.example.carreradecaballosm03uf5.model.Tablero;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD.nuevoIdPartida;
 
 public class TableroController {
 
-
-    private static final int LINEAS = 4;  // Número de lineas que representan caballos
-    private static final int TAMANO_CELULA = 80; // Tamanño de los cuadrados de la linea de partida
-
-    private static final int TAMANO_CUADRADO = 20; // Tamaño de los cuadrados rojos y blancos
-
     private HBox parentHBox; // Guardando referencia al container padre
-
-    private Tablero Tablero; // Tablero del juego
+    private Tablero tablero; // Tablero del juego
     private Juego nuevoJuego;  // Nuevo juego emepzado
-    private String nombreArchivo= null; // es el nombre del archivo json para que solo se inicie una vez
-    private String rutaCarpeta = "Historico_cartas"; // Especifica aquí la ruta a tu carpeta
+    private String nombreArchivo = null; // es el nombre del archivo json para que solo se inicie una vez
 
     @FXML
     private GridPane gridPane; // Referência al Tablero
@@ -61,49 +51,50 @@ public class TableroController {
         this.jugadores = jugadores;
     }
 
-    /*public void setIdPartida(int idPartida) {
-        this.idPartida = idPartida;
-    }*/
-
     @FXML
     public void initialize() {
-        Tablero = new Tablero();
+        tablero = new Tablero(new HashMap<>());
         // Posiciones de los caballos
-        MovimientosCaballo movimientosCaballo = new MovimientosCaballo(Tablero);
+        MovimientosCaballo movimientosCaballo = new MovimientosCaballo(tablero);
         nuevoJuego = new Juego(movimientosCaballo);
     }
 
     //Iniciar la estructura del tablero dinamicamente
-
-    public void iniciarTablero(Stage primaryStage) {
+    public void iniciarTablero(Stage primaryStage, List<Jugador> jugadoresList, int idPartida, Map<String, Integer> posicicionDeLosCaballos, Boolean isGameLoad) {
 
         HBox layoutPrincipal = new HBox();
 
         layoutPrincipal.setPadding(new Insets(0));
         layoutPrincipal.setAlignment(Pos.CENTER);
 
-
         HBox columnaInicio = crearColumnaLateral("Start", true);
         gridPane = crearTablero();
         gridPane.setHgap(0);
         gridPane.setVgap(0);
 
-        CardSuit[] palos = CardSuit.values();
-        for (int i = 0; i < palos.length; i++) {
-            CardSuit suit = palos[i];
-            int posicion = Tablero.obtenerPosicion(suit);
-            String caminoImagen = "/images/KNIGHT_" + suit + ".png";
-            posicionarCaballo(gridPane, caminoImagen, i, posicion);
+        //Si es vacio carga una nueva partida
+        if (isGameLoad) {
+            //si viene valores de jugadores, buscamos la posición
+            for (Jugador jugador : jugadoresList) {
+                // Recuperar la posición de cada jugador
+                recuperarPosicionCaballo(jugador.getIdJugador());
+            }
+        } else {
+            CardSuit[] palos = CardSuit.values();
+            for (int i = 0; i < palos.length; i++) {
+                CardSuit suit = palos[i];
+                int posicion = tablero.obtenerPosicion(suit, 0);
+                String caminoImagen = "/images/KNIGHT_" + suit + ".png";
+                posicionarCaballo(gridPane, caminoImagen, i, posicion);
+            }
         }
 
         HBox columnaFinal = crearColumnaLateral("End", false);
         layoutPrincipal.getChildren().addAll(columnaInicio, gridPane, columnaFinal);
 
-
         Canvas bordaArriba = crearBordaAlternada(1015, 5);
         Canvas bordaAbajo = crearBordaAlternada(1015, 5);
-        HBox botonesInferiores = crearBotonesInferiores();
-
+        HBox botonesInferiores = crearBotonesInferiores(idPartida, posicicionDeLosCaballos, isGameLoad);
 
         mensajeTexto = new Text("Presione el botón 'Jugar' para iniciar el juego.");
         mensajeTexto.setStyle("-fx-font-size: 14; -fx-fill: black; -fx-font-weight: bold;");
@@ -111,27 +102,21 @@ public class TableroController {
         lineaTexto.setAlignment(Pos.CENTER);
         lineaTexto.setPadding(new Insets(0, 0, 30, 0));
 
-
         VBox containerBordas = new VBox();
         containerBordas.setSpacing(0);
         containerBordas.setAlignment(Pos.CENTER);
         containerBordas.getChildren().addAll(bordaArriba, layoutPrincipal, bordaAbajo, botonesInferiores, lineaTexto);
 
-
         ImageView backgroundImageView = new ImageView(new Image(getClass().getResourceAsStream("/images/background.jpg")));
         backgroundImageView.setPreserveRatio(true);
         backgroundImageView.setOpacity(0.5);
 
-
         StackPane stackPane = new StackPane();
         stackPane.getChildren().addAll(backgroundImageView, containerBordas);
 
-
         Scene scene = new Scene(stackPane, primaryStage.getWidth(), primaryStage.getHeight());
 
-
         scene.getStylesheets().add(getClass().getResource("/org/example/carreradecaballosm03uf5/styles/tablero.css").toExternalForm());
-
 
         primaryStage.setTitle("Carrera de caballos");
         primaryStage.setMaximized(true);
@@ -139,18 +124,16 @@ public class TableroController {
         primaryStage.show();
     }
 
-
-
     //Crear estructura de la pista
     private GridPane crearTablero() {
         GridPane gridPane = new GridPane();
 
-        for (int linha = 0; linha < LINEAS; linha++) {
-            for (int coluna = 0; coluna < Tablero.getLongitudDeLasPistas(); coluna++) {
-                Rectangle celula = new Rectangle(TAMANO_CELULA, TAMANO_CELULA);
+        for (int linha = 0; linha < Constants.LINEAS; linha++) {
+            for (int coluna = 0; coluna < Constants.LONGITUD_PISTAS; coluna++) {
+                Rectangle celula = new Rectangle(Constants.TAMANO_CELULA, Constants.TAMANO_CELULA);
                 celula.setFill(Color.BLACK);
 
-                Line lineaPuntos = new Line(0, TAMANO_CELULA, TAMANO_CELULA, TAMANO_CELULA);
+                Line lineaPuntos = new Line(0, Constants.TAMANO_CELULA, Constants.TAMANO_CELULA, Constants.TAMANO_CELULA);
                 lineaPuntos.setStroke(Color.WHITE);
                 lineaPuntos.setStrokeWidth(3);
                 lineaPuntos.getStrokeDashArray().addAll(10.0, 10.0);
@@ -162,32 +145,10 @@ public class TableroController {
                 gridPane.add(stackPane, coluna, linha);
             }
         }
-
         return gridPane;
     }
-    /*private HBox crearBotonesInferiores() {
-        javafx.scene.control.Button salir = new javafx.scene.control.Button("Salir");
-        javafx.scene.control.Button jugarRonda = new javafx.scene.control.Button("Jugar Ronda");
-        javafx.scene.control.Button guardar = new javafx.scene.control.Button("Guardar y salir");
 
-
-        jugarRonda.getStyleClass().add("button");
-        salir.getStyleClass().add("button");
-        guardar.getStyleClass().add("button");
-        jugarRonda.setOnAction(e -> jugarRonda());
-        salir.setOnAction(e -> System.exit(0));
-        //guardar.setOnAction(e -> guardarRonda());
-
-
-        HBox cajaBoton = new HBox(20);
-        cajaBoton.setAlignment(Pos.CENTER);
-        cajaBoton.setPadding(new Insets(20, 0, 20, 0));
-        cajaBoton.getChildren().addAll(jugarRonda, salir, guardar);
-
-        return cajaBoton;
-    }*/
-
-    /*private HBox crearBotonesInferiores() {
+    private HBox crearBotonesInferiores(int idPartida, Map<String, Integer> posicicionDeLosCaballos, Boolean isGameLoad) {
         javafx.scene.control.Button salir = new javafx.scene.control.Button("Salir");
         javafx.scene.control.Button jugarRonda = new javafx.scene.control.Button("Jugar Ronda");
         javafx.scene.control.Button guardar = new javafx.scene.control.Button("Guardar y salir");
@@ -197,74 +158,33 @@ public class TableroController {
         guardar.getStyleClass().add("button");
 
         // Acción de jugar ronda
-        jugarRonda.setOnAction(e -> jugarRonda());
+        jugarRonda.setOnAction(e -> jugarRonda(idPartida, posicicionDeLosCaballos, isGameLoad));
 
         // Acción de salir
-        salir.setOnAction(e -> System.exit(0));
+        salir.setOnAction(e -> {
+            //cambiamos el estado a cancelada
+            CarreraDeCaballosBBDD.updatePartidaState("cancelada", idPartida);
 
-        // Acción de guardar posición y salir
-        guardar.setOnAction(e -> {
-            // Obtener las posiciones de los jugadores en el tablero antes de salir
-            // Estos valores deben ser calculados de acuerdo a la lógica del tablero
-            int[] idsJugadores = {1, 2, 3, 4};
-            int[][] posiciones = {
-                    {0, 1}, // Jugador 1
-                    {0, 2}, // Jugador 2
-                    {0, 3}, // Jugador 3
-                    {0, 4}  // Jugador 4
-            };
-            CardSuit[] palos = {CardSuit.SWORDS, CardSuit.CLUBS, CardSuit.CUPS, CardSuit.GOLD};
+            //Cerrar conexión con BBDD
+            try {
+                ConexionDB.closeConnection();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
 
-// Guardar posiciones y palos
-            guardarPosicionAntesDeSalir(idsJugadores, posiciones, palos);
-
-
-            // Cerrar la aplicación después de guardar
             System.exit(0);
         });
 
-        // Crear el contenedor de botones
-        HBox cajaBoton = new HBox(20);
-        cajaBoton.setAlignment(Pos.CENTER);
-        cajaBoton.setPadding(new Insets(20, 0, 20, 0));
-        cajaBoton.getChildren().addAll(jugarRonda, salir, guardar);
-
-        return cajaBoton;
-    }*/
-
-    private HBox crearBotonesInferiores() {
-        javafx.scene.control.Button salir = new javafx.scene.control.Button("Salir");
-        javafx.scene.control.Button jugarRonda = new javafx.scene.control.Button("Jugar Ronda");
-        javafx.scene.control.Button guardar = new javafx.scene.control.Button("Guardar y salir");
-
-        jugarRonda.getStyleClass().add("button");
-        salir.getStyleClass().add("button");
-        guardar.getStyleClass().add("button");
-
-        // Acción de jugar ronda
-        jugarRonda.setOnAction(e -> jugarRonda());
-
-        // Acción de salir
-        salir.setOnAction(e -> System.exit(0));
-
         // Acción de guardar posición y salir
         guardar.setOnAction(e -> {
-            // Crear instancia de la clase BBDD
-            CarreraDeCaballosBBDD bbdd = new CarreraDeCaballosBBDD();
+            //Cerrar conexión con BBDD
+            try {
+                ConexionDB.closeConnection();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
 
-            // Obtener las posiciones de los jugadores en el tablero
-            // Supongamos que estas posiciones se obtienen de un método o están definidas
-            Map<String, Integer> posicionesCaballos = new HashMap<>();
-            posicionesCaballos.put("Oros", 1);    // Primera línea
-            posicionesCaballos.put("Espadas", 2); // Segunda línea
-            posicionesCaballos.put("Copas", 3);   // Tercera línea
-            posicionesCaballos.put("Bastos", 4);  // Cuarta línea
-
-            // Guardar las posiciones en la base de datos para una partida específica
-            int idPartida = obtenerIdPartidaActual(); // Método que retorna el ID de la partida actual
-            bbdd.guardarPosicionesAntesDeSalir(idPartida, posicionesCaballos);
-
-            // Cerrar la aplicación después de guardar
+            // Cerrar la aplicación sin cambiar el estado de pendiente
             System.exit(0);
         });
 
@@ -276,15 +196,6 @@ public class TableroController {
 
         return cajaBoton;
     }
-
-    // Método ficticio para obtener el ID de la partida actual
-    private int obtenerIdPartidaActual() {
-        // Reemplaza con la lógica para obtener el ID de la partida que está en curso
-        return 34; // Ejemplo: Partida con ID 34
-    }
-
-
-
 
     private Canvas crearBordaAlternada(double ancho, double alto) {
         Canvas canvas = new Canvas(ancho, alto);
@@ -297,7 +208,8 @@ public class TableroController {
         }
         return canvas;
     }
-    private HBox crearColumnaLateral(String label,boolean isStart) {
+
+    private HBox crearColumnaLateral(String label, boolean isStart) {
         Text textoColumna = new Text(label);
         textoColumna.setStyle("-fx-font-size: 25; -fx-fill: white; -fx-font-weight: bold;");
         textoColumna.setRotate(90);
@@ -307,54 +219,65 @@ public class TableroController {
         fondoColumna.setMinWidth(50);
         fondoColumna.setPrefWidth(50);
 
-
         StackPane.setAlignment(textoColumna, Pos.CENTER);
         fondoColumna.getChildren().add(textoColumna);
-
 
         GridPane lateralGrid = new GridPane();
 
 
-        int altoTablero = LINEAS * TAMANO_CELULA;
-        int numeroLineas = altoTablero / TAMANO_CUADRADO;
+        int altoTablero = Constants.LINEAS * Constants.TAMANO_CELULA;
+        int numeroLineas = altoTablero / Constants.TAMANO_CUADRADO;
 
         for (int linha = 0; linha < numeroLineas; linha++) {
             for (int coluna = 0; coluna < 2; coluna++) {
-                Rectangle celula = new Rectangle(TAMANO_CUADRADO, TAMANO_CUADRADO);
+                Rectangle celula = new Rectangle(Constants.TAMANO_CUADRADO, Constants.TAMANO_CUADRADO);
                 celula.setFill((linha + coluna) % 2 == 0 ? Color.BLACK : Color.WHITE);
                 lateralGrid.add(celula, coluna, linha);
             }
         }
 
-
         HBox hBox = new HBox();
 
-        if(isStart){
+        if (isStart) {
             hBox.getChildren().addAll(fondoColumna, lateralGrid);
-        }else{
-            hBox.getChildren().addAll(lateralGrid,fondoColumna);
+        } else {
+            hBox.getChildren().addAll(lateralGrid, fondoColumna);
         }
-
-
         return hBox;
     }
 
     //Jugar
-    private void jugarRonda() {
+    private void jugarRonda(int idPartida, Map<String, Integer> posicicionDeLosCaballos, Boolean isGameLoad) {
+        String rutaCarpeta = "Historico_cartas"; // Especifica aquí la ruta a tu carpeta
 
         if (nuevoJuego.getGanador() == null) {
 
-            int ronda = (nuevoJuego.getRonda() );
+            int ronda = (nuevoJuego.getRonda());
 
-            Card cartaSacada = nuevoJuego.jugarRonda();
-            if (cartaSacada != null ) {
+            if (isGameLoad) {
+                //actualiza tablero
+                tablero = new Tablero(posicicionDeLosCaballos);
+                // Posiciones de los caballos
+                MovimientosCaballo movimientosCaballo = new MovimientosCaballo(tablero);
+                nuevoJuego = new Juego(movimientosCaballo);
+
+                //proxima ronda
+                ronda = CarreraDeCaballosBBDD.getLastRonda(idPartida) + 1;
+                nuevoJuego.setRonda(ronda);
+            }
+
+            Card cartaSacada = nuevoJuego.jugarRonda(idPartida);
+            if (cartaSacada != null) {
 
                 Text nuevoMensajeTexto = new Text("Ronda " + ronda + ": El crupier ha sacado " + cartaSacada.getDescription());
                 nuevoMensajeTexto.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-fill: black;");
 
                 if (nombreArchivo == null) {
 
-                    File carpeta = new File(rutaCarpeta); if (!carpeta.exists()) { carpeta.mkdirs(); }
+                    File carpeta = new File(rutaCarpeta);
+                    if (!carpeta.exists()) {
+                        carpeta.mkdirs();
+                    }
 
                     LocalDateTime ahora = LocalDateTime.now();
                     DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
@@ -364,10 +287,9 @@ public class TableroController {
 
                 try (FileWriter fw = new FileWriter(nombreArchivo, true);  // true indica que se agrega al final del archivo
                      PrintWriter pw = new PrintWriter(fw)) {
-                    //pw.println("{Descripcion Carta: " +  cartaSacada.getDescription() + ", Numero de carta: " + cartaSacada.getValue()+ ", Palo de la carta: " + cartaSacada.getSuit() + "}");  // Escribe el mensaje en el archivo
                     pw.println("{\"Descripcion Carta\": \"" + cartaSacada.getDescription() + "\", \"Numero de carta\": " + cartaSacada.getValue() + ", \"Palo de la carta\": \"" + cartaSacada.getSuit() + "\"},");
                 } catch (IOException e) {
-                    e.printStackTrace();  // Imprime cualquier error que ocurra al escribir el archivo
+                    System.out.println("Error: " + e.getMessage());
                 }
 
                 String[] carta = cartaSacada.getDescription().split("de");
@@ -375,8 +297,7 @@ public class TableroController {
                 String valor = carta[0];
                 System.out.println(ronda + palo + valor);
 
-                CarreraDeCaballosBBDD.guardarRonda(ronda, valor, palo);
-
+                CarreraDeCaballosBBDD.guardarRonda(ronda, valor, palo, idPartida);
 
                 // Obtener la ruta de la imagen de la carta
                 String caminoImagen = cartaSacada.getImagePath();
@@ -388,7 +309,6 @@ public class TableroController {
                     ImageView cartaView = new ImageView(imagemCarta);
                     cartaView.setFitHeight(120);
                     cartaView.setPreserveRatio(true);
-
 
                     HBox mensajeConImagen = new HBox(15);
                     mensajeConImagen.setAlignment(Pos.CENTER_LEFT);
@@ -418,15 +338,12 @@ public class TableroController {
                     }
                 }
             }
-            actualizarTablero();
-        }else{
-//            System.out.println("ya hay un ganador, llamar nueva pantalla aqui");
+            actualizarTablero(idPartida);
         }
     }
 
-
     // Método para actualizar el tablero y la posición de los caballos
-    private void actualizarTablero() {
+    private void actualizarTablero(Integer idPartida) {
         // Eliminar elementos del gridPane que son de tipo StackPane con un hijo ImageView (para actualizar la visualización)
         gridPane.getChildren().removeIf(node -> node instanceof StackPane && ((StackPane) node).getChildren().get(0) instanceof ImageView);
 
@@ -434,23 +351,30 @@ public class TableroController {
         CardSuit[] palos = CardSuit.values();
 
         // Iterar sobre cada palo (caballo) para actualizar su posición
-        for (int i = 0; i < palos.length; i++) {
-            CardSuit suit = palos[i]; // Palo actual
-            int posicion = Tablero.obtenerPosicion(suit); // Obtener la posición del caballo en el tablero
+        for (int line = 0; line < palos.length; line++) {
+            CardSuit suit = palos[line]; // Palo actual
+
+            int columna = tablero.obtenerPosicion(suit, idPartida); // Obtener la posición del caballo en el tablero
 
             // Construir la ruta de la imagen correspondiente al caballo
             String caminoImagen = "/images/KNIGHT_" + suit + ".png";
 
             // Posicionar el caballo en la celda correspondiente
-            posicionarCaballo(gridPane, caminoImagen, i, posicion);
+            posicionarCaballo(gridPane, caminoImagen, line, columna);
+
+            //actualiza la posición del los jugadores
+            updatePositions(suit.getDescription(), line, columna, idPartida);
 
             // Verificar si un caballo ha alcanzado la meta
-            if (posicion >= Tablero.getLongitudDeLasPistas()) {
+            if (columna >= Constants.LONGITUD_PISTAS) {
                 // Definir al ganador del juego y actualizar la información del bote final
                 nuevoJuego.definirGanador(jugadores, suit);
 
                 // Cambiar a la pantalla de resultados, mostrando el ganador y el bote final
                 cambiarALaPantallaGanador(nuevoJuego.getGanador(), nuevoJuego.getBoteFinal());
+
+                //cambiamos el estado de la partida a finalizada
+                CarreraDeCaballosBBDD.updatePartidaState("finalizada", idPartida);
 
                 // Salir del ciclo, ya que se ha encontrado un ganador
                 break;
@@ -459,15 +383,15 @@ public class TableroController {
     }
 
     // Método para posicionar un caballo en el tablero
-    private void posicionarCaballo(GridPane gridPane, String caminoImagen, int linha, int coluna) {
+    private void posicionarCaballo(GridPane gridPane, String caminoImagen, int linea, int columna) {
         try {
             // Cargar la imagen del caballo desde el recurso especificado
             Image caballoImage = new Image(getClass().getResourceAsStream(caminoImagen));
             ImageView caballoView = new ImageView(caballoImage);
 
             // Ajustar el tamaño del ImageView para adaptarse a la celda
-            caballoView.setFitWidth(TAMANO_CELULA - 10); // Ancho ajustado
-            caballoView.setFitHeight(TAMANO_CELULA - 10); // Alto ajustado
+            caballoView.setFitWidth(Constants.TAMANO_CELULA - 10); // Ancho ajustado
+            caballoView.setFitHeight(Constants.TAMANO_CELULA - 10); // Alto ajustado
             caballoView.setPreserveRatio(true); // Mantener la proporción de la imagen
 
             // Crear un StackPane para contener la imagen y permitir apilar elementos si es necesario
@@ -475,63 +399,12 @@ public class TableroController {
             celulaPane.getChildren().add(caballoView);
 
             // Añadir el StackPane al gridPane en la posición especificada
-            gridPane.add(celulaPane, coluna, linha);
+            gridPane.add(celulaPane, columna, linea);
         } catch (Exception e) {
             // Manejar excepciones relacionadas con la carga de imágenes
-          //  System.err.println("Error al cargar la imagen: " + caminoImagen);
-            e.printStackTrace(); // Mostrar la traza del error para depuración
+            System.err.println("Error al cargar la imagen: " + caminoImagen);
         }
     }
-
-/*
-    private void guardarPosicionAntesDeSalir(int[] idsJugadores, int[][] posiciones, CardSuit[] palos) {
-        // Preparamos la consulta SQL para actualizar las posiciones y los palos de los jugadores
-        // Usamos `nuevoIdPartida` para generar el nombre de la tabla correspondiente
-        String sql = "UPDATE jugadores" + nuevoIdPartida + " SET posicion = ?, palo = ? WHERE idJugador = ?";
-
-        try (
-                // Obtenemos la conexión a la base de datos utilizando el método getConnection() de CarreraDeCaballosBBDD
-                Connection conn = CarreraDeCaballosBBDD.getConnection()
-        ) {
-            // Verificamos si la conexión es nula o está cerrada, en cuyo caso lanzamos una excepción
-            if (conn == null || conn.isClosed()) {
-                throw new SQLException("La conexión a la base de datos no está disponible.");
-            }
-
-            // Creamos un PreparedStatement para ejecutar la consulta SQL de actualización
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                // Iteramos sobre los jugadores para actualizar su posición y palo
-                for (int i = 0; i < idsJugadores.length; i++) {
-                    // Obtenemos los valores necesarios para la consulta
-                    int idJugador = idsJugadores[i]; // ID del jugador
-                    int fila = posiciones[i][0];     // Fila de la posición
-                    int columna = posiciones[i][1];  // Columna de la posición
-                    String posicion = fila + "," + columna; // Convertimos la posición a una cadena "fila,columna"
-                    String palo = palos[i].name();          // Obtenemos el nombre del palo (por ejemplo, "SWORDS")
-
-                    // Asignamos los parámetros a la consulta SQL
-                    stmt.setString(1, posicion); // Asignamos la posición
-                    stmt.setString(2, palo);     // Asignamos el palo
-                    stmt.setInt(3, idJugador);   // Asignamos el ID del jugador
-
-                    // Ejecutamos la actualización en la base de datos
-                    stmt.executeUpdate();
-
-                    // Imprimimos un mensaje de éxito para cada jugador
-                    System.out.println("Posición y palo guardados correctamente para el jugador ID: " + idJugador);
-                }
-            }
-        } catch (SQLException e) {
-            // Si ocurre una excepción durante el proceso, la capturamos y mostramos un mensaje de error
-            System.out.println("Error al guardar las posiciones y palos de los caballos: " + e.getMessage());
-        }
-    }*/
-
-
-
-
-
-
 
     //Cambiar a la pantalla del ganador
     private void cambiarALaPantallaGanador(Jugador ganador, Integer bote) {
@@ -553,6 +426,38 @@ public class TableroController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void updatePositions(String card, int linea, int column, int idPartida) {
+        CarreraDeCaballosBBDD.updatePositions(card, linea, column, idPartida);
+    }
+
+    private void recuperarPosicionCaballo(int idJugador) {
+        String sql = "SELECT palo, linea, columna FROM jugadores WHERE idJugador = ?";
+
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idJugador);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String palo = rs.getString("palo");
+                int linea = rs.getInt("linea");
+                int columna = rs.getInt("columna");
+
+                // Llamar a un método para reposicionar el caballo en el tablero
+                reposicionarCaballo(palo, linea, columna);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al recuperar la posición del caballo: " + e.getMessage());
+        }
+    }
+
+    private void reposicionarCaballo(String palo, int linea, int columna) {
+        CardSuit suit = CardSuit.fromDescription(palo);
+        String caminoImagen = "/images/KNIGHT_" + suit + ".png";
+
+        posicionarCaballo(gridPane, caminoImagen, linea, columna);
     }
 }
 

@@ -18,14 +18,14 @@ import org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ApuestasController {
 
     private Jugador[] jugadores;  // Variable jugadores
-    private int idPartida;  // Variable idPartida
 
     @FXML
     private GridPane jugadoresGrid; // Contenedor de los jugadores
@@ -35,20 +35,6 @@ public class ApuestasController {
         this.jugadores = jugadores;
     }
 
-    // Establecer el valor de idPartida
-    public void setIdPartida(int idPartida) {
-        this.idPartida = idPartida;
-    }
-
-    // Llamada al guardar apuestas cuando es necesario
-    public void procesarApuestas(Jugador[] jugadores, int idPartida) {
-        // Llamamos al método guardarApuestas que ya tienes
-        guardarApuestas(jugadores, idPartida);
-
-        // Aquí podrías agregar más lógica, como actualizar la UI, etc.
-        System.out.println("Apuestas guardadas correctamente.");
-    }
-
     // Método que guarda las apuestas en la base de datos
     public static void guardarApuestas(Jugador[] jugadores, int idPartida) {
         try (Connection conn = ConexionDB.getConnection();
@@ -56,26 +42,24 @@ public class ApuestasController {
 
             for (Jugador jugador : jugadores) {
                 String insertJugador = """
-            INSERT INTO jugadores%s (nombre, palo, bote, posicion, idPartida)
-            VALUES ('%s', '%s', %d, %d, %d);
-            """.formatted(
-                        idPartida, // Tabla dinámica
+                        INSERT INTO jugadores (nombre, palo, bote, linea, columna, idPartida)
+                        VALUES ('%s', '%s', %d, %d, %d, %d);
+                        """.formatted(
                         jugador.getNombre(),
                         jugador.getPalo().getDescription(),
                         jugador.getFichas(),
-                        0, // Posición inicial
+                        0, // linea inicial
+                        0, //columna inicial
                         idPartida // idPartida asociado
                 );
-                stmt.executeUpdate(insertJugador);
+                stmt.execute(insertJugador);
             }
-
             System.out.println("Apuestas guardadas en la base de datos para la partida " + idPartida);
 
         } catch (SQLException e) {
-            System.out.println("Error al guardar las apuestas: " + e.getMessage());
+            System.err.println("Error al guardar las apuestas: " + e.getMessage());
         }
     }
-
 
     // Mostrar las apuestas, como ya tienes implementado
     public void mostrarApuestasDesdeLogica(Jugador[] jugadores) {
@@ -107,22 +91,19 @@ public class ApuestasController {
 
                 jugadorVBox.getChildren().addAll(cartaImageView, nombreLabel, paloLabel, boteLabel);
                 jugadoresGrid.add(jugadorVBox, i % 2, i / 2);
-
-
-
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
     }
 
-
     @FXML
-// Método para continuar a la siguiente pantalla
+    // Método para continuar a la siguiente pantalla
     public void onContinuarButtonClick(ActionEvent actionEvent) {
+        int idPartida;
         try {
             // Crear las tablas y asignar idPartida
-            idPartida = CarreraDeCaballosBBDD.crearTablas(); // Este método devolverá el nuevo idPartida
+            idPartida = CarreraDeCaballosBBDD.crearPartida(); // Este método devolverá el nuevo idPartida
             System.out.println("Tablas creadas con éxito para la partida: " + idPartida);
 
             // Guardar las apuestas en la base de datos
@@ -130,23 +111,21 @@ public class ApuestasController {
 
             // Cargar pantalla del tablero
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/org/example/carreradecaballosm03uf5/views/tablero.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
+            new Scene(fxmlLoader.load());
 
             TableroController controller = fxmlLoader.getController();
             controller.setJugadores(jugadores);
 
             // Inicializar el tablero con los datos de la partida
-            controller.iniciarTablero(new Stage());
+            controller.iniciarTablero(new Stage(), new ArrayList<>(), idPartida, new HashMap<>(), false);
 
             // Obtener el Stage actual y cerrarlo después de abrir la nueva pantalla
             Stage currentStage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             currentStage.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
     }
-
-
 
     @FXML
     // Método para volver a la pantalla de configuración
@@ -161,7 +140,7 @@ public class ApuestasController {
             stage.setTitle("Carrera de Caballos - Menú Principal");
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }
