@@ -8,9 +8,14 @@ public abstract class Card {
         return String.format("%7s de %6s, valor %.1f", numberOrFace, suit, value); // Formato de la representación de la carta
     }
 
-    public float getValue() {
+   /* public int getValue() {
         return value;
+    }*/
+
+    public int getValue() {
+        return (int) value;  // Convierte el valor a entero, descartando la parte decimal
     }
+
 
     public CardSuit getSuit() {
         return suit; // Retorna el palo de la carta

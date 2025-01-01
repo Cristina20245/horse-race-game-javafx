@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
 import javafx.application.Platform;
+import org.example.carreradecaballosm03uf5.bbdd.CarreraDeCaballosBBDD;
 
 import java.io.IOException;
 
@@ -37,7 +38,24 @@ public class HelloController {
         stage.setMaximized(true);
     }
 
-
+    public void onRecuperarButtonClick() {
+        // Llamar a obtener partidas
+        if (!CarreraDeCaballosBBDD.obtenerPartidasGuardadas().isEmpty()) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/carreradecaballosm03uf5/views/partida.fxml"));
+                Parent root = loader.load();
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.setMaximized(false);
+                stage.setMaximized(true);
+                stage.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("No hay partidas guardadas.");
+        }
+    }
 
     @FXML
     // Método para manejar el clic en "Salir"

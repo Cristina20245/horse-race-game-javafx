@@ -62,7 +62,7 @@ public class ConfiguracionController {
 
     // Validación de campos vacíos
     private String validateInput(String playerName, String betAmount, String paloComboBox) {
-      
+
         if (playerName == null || playerName.isEmpty() || betAmount == null || betAmount.isEmpty() || paloComboBox == null) {
             return "Por favor, completa todos los campos.";
         }
@@ -106,7 +106,7 @@ public class ConfiguracionController {
 
             // Pasar datos al controlador
             ApuestasController apuestasController = loader.getController();
-            
+
             Jugador[] jugadores = crearJugadores(playerName, palo, bet);
 
             // Mostrar las apuestas

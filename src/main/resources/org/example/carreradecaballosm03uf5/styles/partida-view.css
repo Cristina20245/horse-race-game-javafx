@@ -1,0 +1,28 @@
+.textoPartida {
+     -fx-font-family: "Racing Sans One", "Arial", sans-serif;
+        -fx-font-size: 40px;
+        -fx-fill: linear-gradient(from 0% 0% to 100% 100%, gold, orange);
+        -fx-effect: dropshadow(gaussian, black, 10, 0.8, 3, 3); /* Sombra negra */
+        -fx-text-alignment: center;
+    }
+
+.button {
+    -fx-font-family: "Arial", sans-serif;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.6);
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+
+.button:hover {
+    -fx-background-color: gold;
+    -fx-text-fill: black;
+    -fx-border-color: gold;
+}

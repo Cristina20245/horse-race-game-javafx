@@ -7,24 +7,23 @@ import org.example.carreradecaballosm03uf5.Utils.MovimientosCaballo;
 
 import java.util.Optional;
 
-
 public class Juego {
-    private CardsDeck barajaSinReyes;
+    private final CardsDeck barajaSinReyes;
     private int ronda = 1;
-    private Card cartaSacada;
-    private MovimientosCaballo movimientosCaballo;
-    private Jugador ganador= null;
-    private  Integer boteFinal;
+    private final MovimientosCaballo movimientosCaballo;
+    private Jugador ganador = null;
+    private Integer boteFinal;
 
     public Juego(MovimientosCaballo movimientosCaballo) {
         this.movimientosCaballo = movimientosCaballo;
         CardsDeck baraja = new CardsDeck();
         this.barajaSinReyes = baraja.filterNumeredCards();
     }
+
     public void definirGanador(Jugador[] jugadores, CardSuit suit) {
-        Jugador jugadorGanador=  encontrarGanador(suit, jugadores);
-        Integer boteTotal=calcularBoteTotal(jugadores);
-        setGanadorYBote(jugadorGanador,boteTotal);
+        Jugador jugadorGanador = encontrarGanador(suit, jugadores);
+        Integer boteTotal = calcularBoteTotal(jugadores);
+        setGanadorYBote(jugadorGanador, boteTotal);
 
     }
 
@@ -38,9 +37,10 @@ public class Juego {
 
     public void setGanadorYBote(Jugador ganador, Integer boteFinal) {
         this.ganador = ganador;
-        this.boteFinal=boteFinal;
+        this.boteFinal = boteFinal;
 
     }
+
     public Jugador encontrarGanador(CardSuit suit, Jugador[] jugadores) {
         for (Jugador jugador : jugadores) {
             if (jugador.getPalo() == suit) {
@@ -49,6 +49,7 @@ public class Juego {
         }
         return null;
     }
+
     public int calcularBoteTotal(Jugador[] jugadores) {
         int totalBote = 0;
         for (Jugador jugador : jugadores) {
@@ -61,16 +62,21 @@ public class Juego {
         return ronda;
     }
 
-    public Card jugarRonda() {
+    public void setRonda(int ronda) {
+        this.ronda = ronda;
+    }
+
+    public Card jugarRonda(int idPartida) {
+        Card cartaSacada;
         try {
             // Saca una carta de la baraja
             cartaSacada = barajaSinReyes.getCardFromDeck();
 
             // Posiciona el caballo según la ronda
             if (ronda % 5 == 0) {
-                movimientosCaballo.retrocederCaballo(cartaSacada);
+                movimientosCaballo.retrocederCaballo(cartaSacada, idPartida);
             } else {
-                movimientosCaballo.avanzarCaballo(cartaSacada);
+                movimientosCaballo.avanzarCaballo(cartaSacada, idPartida);
             }
 
             // Incrementa la ronda
@@ -101,12 +107,11 @@ public class Juego {
                     return null;
                 }
 
-
                 // Posiciona el caballo según la ronda
                 if (ronda % 5 == 0) {
-                    movimientosCaballo.retrocederCaballo(cartaSacada);
+                    movimientosCaballo.retrocederCaballo(cartaSacada, idPartida);
                 } else {
-                    movimientosCaballo.avanzarCaballo(cartaSacada);
+                    movimientosCaballo.avanzarCaballo(cartaSacada, idPartida);
                 }
 
                 // Incrementa la ronda

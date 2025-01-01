@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="20.0" stylesheets="@../styles/partida-view.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.carreradecaballosm03uf5.controllers.PartidaController">
+    <!-- Fondo con StackPane -->
+    <StackPane>
+        <ImageView opacity="0.5" preserveRatio="true">
+            <image>
+                <!-- Corregir la ubicación de la imagen -->
+                <Image url="@../../../../images/background.jpg" />
+            </image>
+        </ImageView>
+
+        <!-- Contenido principal -->
+        <VBox alignment="CENTER" spacing="20">
+            <!-- Etiqueta principal -->
+            <Label fx:id="textoPartida" styleClass="textoPartida" text="Partida Recuperada" textFill="WHITE" />
+
+            <!-- Lista de partidas -->
+            <ListView fx:id="listaPartidas" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" />
+
+            <!-- Opciones de continuar o salir -->
+            <HBox alignment="CENTER" spacing="20.0">
+                <!-- Vinculación de acción a métodos del controlador -->
+                <Button fx:id="botonContinuar" onAction="#onContinuarButtonClick" text="Continuar" />
+
+                <Button fx:id="salirButton" onAction="#onSalirButtonClick" text="Salir" textFill="WHITE" />
+            </HBox>
+        </VBox>
+    </StackPane>
+
+    <!-- Ajuste de márgenes y padding -->
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+</VBox>

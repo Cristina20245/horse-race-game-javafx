@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="BarajaTest" time="0.069" tests="4" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="C:\Users\arthu\Downloads\carreradecaballos-bbdd-carreradecaballos_bbdd\carreradecaballos-bbdd-carreradecaballos_bbdd\target\test-classes;C:\Users\arthu\Downloads\carreradecaballos-bbdd-carreradecaballos_bbdd\carreradecaballos-bbdd-carreradecaballos_bbdd\target\classes;C:\Users\arthu\.m2\repository\org\openjfx\javafx-controls\23.0.1\javafx-controls-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-controls\23.0.1\javafx-controls-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-graphics\23.0.1\javafx-graphics-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-graphics\23.0.1\javafx-graphics-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-base\23.0.1\javafx-base-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-base\23.0.1\javafx-base-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-fxml\23.0.1\javafx-fxml-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-fxml\23.0.1\javafx-fxml-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\arthu\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\arthu\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\arthu\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\arthu\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\arthu\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;C:\Users\arthu\.m2\repository\com\mysql\mysql-connector-j\8.0.32\mysql-connector-j-8.0.32.jar;C:\Users\arthu\.m2\repository\com\google\protobuf\protobuf-java\3.21.9\protobuf-java-3.21.9.jar;"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Europe/Madrid"/>
+    <property name="os.name" value="Windows 11"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="ES"/>
+    <property name="sun.boot.library.path" value="C:\Users\arthu\.jdks\openjdk-21.0.1\bin"/>
+    <property name="sun.java.command" value="C:\Users\arthu\AppData\Local\Temp\surefire565379509585862967\surefirebooter-20241229151023396_3.jar C:\Users\arthu\AppData\Local\Temp\surefire565379509585862967 2024-12-29T15-10-22_666-jvmRun1 surefire-20241229151023396_1tmp surefire_0-20241229151023396_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="C:\Users\arthu\Downloads\carreradecaballos-bbdd-carreradecaballos_bbdd\carreradecaballos-bbdd-carreradecaballos_bbdd\target\test-classes;C:\Users\arthu\Downloads\carreradecaballos-bbdd-carreradecaballos_bbdd\carreradecaballos-bbdd-carreradecaballos_bbdd\target\classes;C:\Users\arthu\.m2\repository\org\openjfx\javafx-controls\23.0.1\javafx-controls-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-controls\23.0.1\javafx-controls-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-graphics\23.0.1\javafx-graphics-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-graphics\23.0.1\javafx-graphics-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-base\23.0.1\javafx-base-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-base\23.0.1\javafx-base-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-fxml\23.0.1\javafx-fxml-23.0.1.jar;C:\Users\arthu\.m2\repository\org\openjfx\javafx-fxml\23.0.1\javafx-fxml-23.0.1-win.jar;C:\Users\arthu\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\arthu\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\arthu\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\arthu\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\arthu\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.10.2\junit-jupiter-engine-5.10.2.jar;C:\Users\arthu\.m2\repository\org\junit\platform\junit-platform-engine\1.10.2\junit-platform-engine-1.10.2.jar;C:\Users\arthu\.m2\repository\com\mysql\mysql-connector-j\8.0.32\mysql-connector-j-8.0.32.jar;C:\Users\arthu\.m2\repository\com\google\protobuf\protobuf-java\3.21.9\protobuf-java-3.21.9.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\arthu"/>
+    <property name="user.language" value="es"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2023-10-17"/>
+    <property name="java.home" value="C:\Users\arthu\.jdks\openjdk-21.0.1"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="C:\Users\arthu\Downloads\carreradecaballos-bbdd-carreradecaballos_bbdd\carreradecaballos-bbdd-carreradecaballos_bbdd"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\arthu\AppData\Local\Temp\surefire565379509585862967\surefirebooter-20241229151023396_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="21.0.1+12-29"/>
+    <property name="user.name" value="arthu"/>
+    <property name="stdout.encoding" value="Cp1252"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="localRepository" value="C:\Users\arthu\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="C:\Users\arthu\AppData\Local\Temp\"/>
+    <property name="idea.version" value="2023.3.3"/>
+    <property name="java.version" value="21.0.1"/>
+    <property name="user.dir" value="C:\Users\arthu\Downloads\carreradecaballos-bbdd-carreradecaballos_bbdd\carreradecaballos-bbdd-carreradecaballos_bbdd"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="C:\Users\arthu\.jdks\openjdk-21.0.1\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\System32\HWAudioDriverLibs;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Java\jdk1.8.0_202\bin;C:\Program Files\PuTTY\;C:\Program Files\Docker\Docker\resources\bin;C:\WINDOWS\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;C:\windows\system32\HWAudioDriver\;C:\Program Files\Git\cmd;%NVM_HOME%;%NVM_SYMLINK%;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\;C:\Users\arthu\dev\flutter\bin;C:\Users\arthu\AppData\Local\Microsoft\WindowsApps;C:\Users\arthu\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\arthu\AppData\Roaming\npm;C:\Users\arthu\AppData\Roaming\nvm;C:\Program Files\nodejs;;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="Cp1252"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="21.0.1+12-29"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testGetCardFromDeck_DevuelveCartaCuandoHayCartasDisponibles" classname="BarajaTest" time="0.03"/>
+  <testcase name="testGetCardFromDeck_DisminuyeElTamañoDelMazo" classname="BarajaTest" time="0.002"/>
+  <testcase name="testGetCardFromDeck_TodasLasCartasSonUnicas" classname="BarajaTest" time="0.007"/>
+  <testcase name="testGetCardFromDeck_LanzaBarajaVaciaExceptionCuandoNoHayCartas" classname="BarajaTest" time="0.007"/>
+</testsuite>
